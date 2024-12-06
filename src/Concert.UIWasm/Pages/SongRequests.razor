@@ -1,0 +1,37 @@
+﻿@page "/song-requests"
+@using Concert.Business.Models.Domain
+@using Concert.DataAccess.InMemory.Repositories
+@using Microsoft.AspNetCore.Components.QuickGrid;
+
+<PageTitle>Song requests</PageTitle>
+
+@inject NavigationManager NavigationManager
+@inject ISongRequestsRepository SongRequestRepository
+
+<h3>Song requests</h3>
+<br />
+@if (songRequests is not null)
+{
+    <QuickGrid Items="songRequests.AsQueryable()" Pagination="paginationState">
+        <PropertyColumn Property="s => s.Artist" Sortable="true"></PropertyColumn>
+        <PropertyColumn Property="s => s.Title" Sortable="true"></PropertyColumn>
+        <PropertyColumn Property="s => s.Genre" Sortable="true"></PropertyColumn>
+        <PropertyColumn Property="s => s.Language" Sortable="true"></PropertyColumn>
+    </QuickGrid>
+    <Paginator State="paginationState"></Paginator>
+}
+
+@code {
+    private List<SongRequest>? songRequests;
+
+    private PaginationState paginationState = new PaginationState{ ItemsPerPage = 3 };
+    
+    protected override void OnAfterRender(bool firstRender)
+    {
+        if (firstRender)
+        {
+            songRequests = SongRequestRepository.GetAll();
+            StateHasChanged();
+        }
+    }
+}
