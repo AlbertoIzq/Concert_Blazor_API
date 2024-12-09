@@ -1,4 +1,5 @@
 ﻿@page "/song-requests"
+@using Concert.Business
 @using Microsoft.AspNetCore.Components.QuickGrid;
 
 <PageTitle>Song requests</PageTitle>
@@ -10,34 +11,52 @@
 <br />
 @if (songRequests is not null)
 {
-    <QuickGrid Items="songRequests.AsQueryable()" Pagination="paginationState">
-        <PropertyColumn Property="s => s.Artist" Sortable="true"></PropertyColumn>
-        <PropertyColumn Property="s => s.Title" Sortable="true"></PropertyColumn>
-        <PropertyColumn Property="s => s.Genre" Sortable="true"></PropertyColumn>
-        <PropertyColumn Property="s => s.Language" Sortable="true"></PropertyColumn>
-        <TemplateColumn>
-            <a href="/song-request/@context.Id" class="btn btn-link">Edit</a>
-        </TemplateColumn>
-        <TemplateColumn>
-            <ChildContent Context="songRequest">
-                <EditForm Model="songRequest"
-                          FormName="@($"form-song-request-{songRequest.Id}")"
-                          OnValidSubmit="@(() => { Delete(songRequest.Id); })">
-                    <button type="submit" class="btn btn-danger">Delete</button>
-                </EditForm>
-            </ChildContent>
-        </TemplateColumn>
-    </QuickGrid>
-    <Paginator State="paginationState"></Paginator>
-    <div>
-        <a href="/song-request" class="btn btn-primary">Add Song request</a>
+    <div class="row">
+        <div class="page-size-chooser col-2">
+            Items per page:
+            <select @bind="@paginationState.ItemsPerPage">
+                <option>@Constants.SONGREQUEST_ITEMS_PER_PAGE_OPTION_1</option>
+                <option>@Constants.SONGREQUEST_ITEMS_PER_PAGE_OPTION_2</option>
+                <option>@Constants.SONGREQUEST_ITEMS_PER_PAGE_OPTION_3</option>
+            </select>
+        </div>
+        <div class="page-size-chooser col-2">
+            <a href="/song-request" class="btn btn-primary">
+                <i class="bi bi-plus-square"></i> Add Song request
+            </a>
+        </div>
     </div>
+    <div class="grid">
+        <QuickGrid Items="songRequests.AsQueryable()" Pagination="paginationState">
+            <PropertyColumn Property="s => s.Artist" Sortable="true" IsDefaultSortColumn="true"></PropertyColumn>
+            <PropertyColumn Property="s => s.Title" Sortable="true"></PropertyColumn>
+            <PropertyColumn Property="s => s.Genre" Sortable="true"></PropertyColumn>
+            <PropertyColumn Property="s => s.Language" Sortable="true"></PropertyColumn>
+            <TemplateColumn>
+                <a href="/song-request/@context.Id" class="btn btn-primary">
+                    <i class="bi bi-pencil-square"></i> Edit
+                </a>
+            </TemplateColumn>
+            <TemplateColumn>
+                <ChildContent Context="songRequest">
+                    <EditForm Model="songRequest"
+                              FormName="@($"form-song-request-{songRequest.Id}")"
+                              OnValidSubmit="@(() => { Delete(songRequest.Id); })">
+                        <button type="submit" class="btn btn-danger">
+                            <i class="bi bi-trash3"></i> Delete
+                        </button>
+                    </EditForm>
+                </ChildContent>
+            </TemplateColumn>
+        </QuickGrid>
+    </div>
+    <Paginator State="paginationState"></Paginator>
 }
 
 @code {
     private List<SongRequest>? songRequests;
 
-    private PaginationState paginationState = new PaginationState{ ItemsPerPage = 3 };
+    private PaginationState paginationState = new PaginationState { ItemsPerPage = Constants.SONGREQUEST_ITEMS_PER_PAGE_OPTION_1 };
     
     protected override void OnAfterRender(bool firstRender)
     {
