@@ -1,6 +1,4 @@
 ﻿@page "/song-requests"
-@using Concert.Business.Models.Domain
-@using Concert.DataAccess.InMemory.Repositories
 @using Microsoft.AspNetCore.Components.QuickGrid;
 
 <PageTitle>Song requests</PageTitle>
@@ -17,6 +15,9 @@
         <PropertyColumn Property="s => s.Title" Sortable="true"></PropertyColumn>
         <PropertyColumn Property="s => s.Genre" Sortable="true"></PropertyColumn>
         <PropertyColumn Property="s => s.Language" Sortable="true"></PropertyColumn>
+        <TemplateColumn>
+            <a href="/song-requests/@context.Id" class="btn btn-link">Edit</a>
+        </TemplateColumn>
     </QuickGrid>
     <Paginator State="paginationState"></Paginator>
 }

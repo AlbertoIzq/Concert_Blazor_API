@@ -1,0 +1,109 @@
+﻿@page "/song-requests/{id:int?}"
+@using Concert.DataAccess.InMemory.Repositories
+
+<PageTitle>Song requests - Add/Edit</PageTitle>
+
+@inject NavigationManager NavigationManager
+@inject ISongRequestsRepository SongRequestRepository
+
+@if (Id.HasValue)
+{
+    <h3>Edit Song request</h3>
+}
+else
+{
+    <h3>Add Song request</h3>
+}
+<br />
+@if (songRequest is not null)
+{
+    <EditForm Model="songRequest" FormName="formSongRequest" OnValidSubmit="Submit">
+        <DataAnnotationsValidator></DataAnnotationsValidator>
+        <ValidationSummary></ValidationSummary>
+
+        @if (songRequest.Id > 0)
+        {
+            <InputNumber @bind-Value="songRequest.Id" hidden></InputNumber>
+        }
+
+        <FieldComponent Label="Artist">
+            <Control>
+                <InputText @bind-Value="songRequest.Artist" class="form-control"></InputText>
+            </Control>
+            <ValidationControl>
+                <ValidationMessage For="() => songRequest.Artist"></ValidationMessage>
+            </ValidationControl>
+        </FieldComponent>
+        <FieldComponent Label="Title">
+            <Control>
+                <InputText @bind-Value="songRequest.Title" class="form-control"></InputText>
+            </Control>
+            <ValidationControl>
+                <ValidationMessage For="() => songRequest.Title"></ValidationMessage>
+            </ValidationControl>
+        </FieldComponent>
+        <FieldComponent Label="Genre">
+            <Control>
+                <InputText @bind-Value="songRequest.Genre" class="form-control"></InputText>
+            </Control>
+            <ValidationControl>
+                <ValidationMessage For="() => songRequest.Genre"></ValidationMessage>
+            </ValidationControl>
+        </FieldComponent>
+        <FieldComponent Label="Language">
+            <Control>
+                <InputText @bind-Value="songRequest.Language" class="form-control"></InputText>
+            </Control>
+            <ValidationControl>
+                <ValidationMessage For="() => songRequest.Language"></ValidationMessage>
+            </ValidationControl>
+        </FieldComponent>
+        <br />
+        @if (songRequest.Id > 0)
+        {
+            <button class="btn btn-primary" type="submit">Update</button>
+        }
+        else
+        {
+            <button class="btn btn-primary" type="submit">Save</button>
+        }
+        &nbsp;
+        <a href="/song-requests" class="btn btn-primary">Close</a>
+    </EditForm>
+}
+
+@code {
+    [Parameter]
+    public int? Id { get; set; }
+
+    [SupplyParameterFromForm]
+    private SongRequest? songRequest { get; set; }
+
+    protected override void OnParametersSet()
+    {
+        if (Id.HasValue)
+        {
+            songRequest ??= SongRequestRepository.GetById(this.Id.Value);
+        }
+        else
+        {
+            songRequest ??= new SongRequest();
+        }
+    }
+
+    private void Submit()
+    {
+        if (songRequest is not null)
+        {
+            if (this.Id.HasValue)
+            {
+                SongRequestRepository.Update(songRequest.Id, songRequest);
+            }
+            else
+            {
+                //SongRequestRepository.Create(songRequest);
+            }
+        }
+        NavigationManager.NavigateTo($"/song-requests");
+    }
+}

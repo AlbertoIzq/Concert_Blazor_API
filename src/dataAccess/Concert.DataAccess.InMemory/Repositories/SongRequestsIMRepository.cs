@@ -69,5 +69,22 @@ namespace Concert.DataAccess.InMemory.Repositories
 
             return null;
         }
+
+        public void Update(int id, SongRequest songRequest)
+        {
+            if (id != songRequest.Id)
+            {
+                return;
+            }
+
+            var songRequestToUpdate = _songRequests.Find(s => s.Id == id);
+            if (songRequestToUpdate is not null)
+            {
+                songRequestToUpdate.Artist = songRequest.Artist;
+                songRequestToUpdate.Title = songRequest.Title;
+                songRequestToUpdate.Genre = songRequest.Genre;
+                songRequestToUpdate.Language = songRequest.Language;
+            }
+        }
     }
 }
