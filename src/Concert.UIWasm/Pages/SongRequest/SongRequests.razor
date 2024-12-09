@@ -18,6 +18,15 @@
         <TemplateColumn>
             <a href="/song-request/@context.Id" class="btn btn-link">Edit</a>
         </TemplateColumn>
+        <TemplateColumn>
+            <ChildContent Context="songRequest">
+                <EditForm Model="songRequest"
+                          FormName="@($"form-song-request-{songRequest.Id}")"
+                          OnValidSubmit="@(() => { Delete(songRequest.Id); })">
+                    <button type="submit" class="btn btn-danger">Delete</button>
+                </EditForm>
+            </ChildContent>
+        </TemplateColumn>
     </QuickGrid>
     <Paginator State="paginationState"></Paginator>
     <div>
@@ -36,6 +45,16 @@
         {
             songRequests = SongRequestRepository.GetAll();
             StateHasChanged();
+        }
+    }
+
+    private void Delete(int id)
+    {
+        if (id > 0)
+        {
+            SongRequestRepository.Delete(id);
+            // Used to refresh the page
+            //NavigationManager.NavigateTo("/song-requests", true);
         }
     }
 }

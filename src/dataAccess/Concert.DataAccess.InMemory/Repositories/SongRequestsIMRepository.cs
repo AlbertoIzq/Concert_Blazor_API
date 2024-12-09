@@ -93,5 +93,14 @@ namespace Concert.DataAccess.InMemory.Repositories
                 songRequestToUpdate.Language = songRequest.Language;
             }
         }
+
+        public void Delete(int id)
+        {
+            var songRequest = _songRequests.Find(s => s.Id == id);
+            if (songRequest is not null)
+            {
+                _songRequests.Remove(songRequest);
+            }
+        }
     }
 }

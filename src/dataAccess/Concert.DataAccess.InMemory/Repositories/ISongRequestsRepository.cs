@@ -13,5 +13,6 @@ namespace Concert.DataAccess.InMemory.Repositories
         List<SongRequest> GetAll();
         SongRequest? GetById(int id);
         void Update(int id, SongRequest songRequest);
+        void Delete(int id);
     }
 }
