@@ -9,6 +9,7 @@ namespace Concert.DataAccess.InMemory.Repositories
 {
     public interface ISongRequestsRepository
     {
+        void Create(SongRequest songRequest);
         List<SongRequest> GetAll();
         SongRequest? GetById(int id);
         void Update(int id, SongRequest songRequest);

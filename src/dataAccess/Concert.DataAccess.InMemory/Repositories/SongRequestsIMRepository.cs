@@ -48,6 +48,13 @@ namespace Concert.DataAccess.InMemory.Repositories
             }
         };
 
+        public void Create(SongRequest songRequest)
+        {
+            var maxId = _songRequests.Max(s => s.Id);
+            songRequest.Id = maxId + 1;
+            _songRequests.Add(songRequest);
+        }
+
         public List<SongRequest> GetAll() => _songRequests;
 
         public SongRequest? GetById(int id)

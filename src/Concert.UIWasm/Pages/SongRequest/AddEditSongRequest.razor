@@ -1,4 +1,4 @@
-﻿@page "/song-requests/{id:int?}"
+﻿@page "/song-request/{id:int?}"
 @using Concert.DataAccess.InMemory.Repositories
 
 <PageTitle>Song requests - Add/Edit</PageTitle>
@@ -101,7 +101,7 @@ else
             }
             else
             {
-                //SongRequestRepository.Create(songRequest);
+                SongRequestRepository.Create(songRequest);
             }
         }
         NavigationManager.NavigateTo($"/song-requests");

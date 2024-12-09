@@ -16,10 +16,13 @@
         <PropertyColumn Property="s => s.Genre" Sortable="true"></PropertyColumn>
         <PropertyColumn Property="s => s.Language" Sortable="true"></PropertyColumn>
         <TemplateColumn>
-            <a href="/song-requests/@context.Id" class="btn btn-link">Edit</a>
+            <a href="/song-request/@context.Id" class="btn btn-link">Edit</a>
         </TemplateColumn>
     </QuickGrid>
     <Paginator State="paginationState"></Paginator>
+    <div>
+        <a href="/song-request" class="btn btn-primary">Add Song request</a>
+    </div>
 }
 
 @code {
