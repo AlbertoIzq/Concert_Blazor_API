@@ -20,6 +20,7 @@ _TECHNOLOGIES USED_
   - C# libraries:
     - Scalar: Open source API platform used as an API client and to generate user-friendly documentation
     - DotEnv.Core: Manage env. files
+	- Automapper: Object-to-object mapping library
 
 _CONCEPTS USED_
 

@@ -1,3 +1,4 @@
+using Concert.Business.Mappings;
 using Concert.DataAccess.API.Data;
 using Concert.DataAccess.API.Repositories;
 using Concert.DataAccess.Interfaces;
@@ -39,6 +40,9 @@ builder.Services.AddDbContext<ConcertDbContext>(options =>
 
 // Add IUnitOfWork service.
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+
+// Add Automapper.
+builder.Services.AddAutoMapper(typeof(AutoMapperProfiles));
 
 var app = builder.Build();
 
