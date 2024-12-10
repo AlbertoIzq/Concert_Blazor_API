@@ -21,13 +21,16 @@ _TECHNOLOGIES USED_
     - Scalar: Open source API platform used as an API client and to generate user-friendly documentation
     - DotEnv.Core: Manage env. files
 
-DotEnv.Core
-
 _CONCEPTS USED_
 
 - N-Tier architecture
 - Design patterns:
 
 _TODO_
+
+- API
+  - Add logger
+  - Add Repository => Add GenericRepository => Add UnitOfWork => Add filtering, sorting, pagination => Add Include properties
+  - Add BaseEntity with Id, CreatedAt and UpdatedAt properties
 
 _BUGS_

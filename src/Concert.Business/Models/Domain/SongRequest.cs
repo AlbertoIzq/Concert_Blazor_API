@@ -2,9 +2,8 @@
 
 namespace Concert.Business.Models.Domain
 {
-    public class SongRequest
+    public class SongRequest : BaseEntity
     {
-        public int Id { get; set; }
         [Required]
         [MaxLength(100)]
         public string Artist { get; set; }

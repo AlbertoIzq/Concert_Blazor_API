@@ -16,52 +16,63 @@ namespace Concert.DataAccess.API.Data
             base.OnModelCreating(modelBuilder);
 
             // Seed to the database
-            modelBuilder.Entity<SongRequest>().HasData(_songRequests);
+            modelBuilder.Entity<SongRequest>().HasData(SongRequestsIniData());
         }
 
         // Data to seed
-        private List<SongRequest> _songRequests = new List<SongRequest>()
+        private List<SongRequest> SongRequestsIniData()
         {
-            new SongRequest()
+            var _songRequests = new List<SongRequest>()
             {
-                Id = 1,
-                Artist = "Ace of base",
-                Title = "All that she wants",
-                Genre = "Reggae",
-                Language = "English",
-            },
-            new SongRequest()
+                new SongRequest()
+                {
+                    Id = 1,
+                    Artist = "Ace of base",
+                    Title = "All that she wants",
+                    Genre = "Reggae",
+                    Language = "English",
+                },
+                new SongRequest()
+                {
+                    Id = 2,
+                    Artist = "And One",
+                    Title = "Military fashion show",
+                    Genre = "EBM",
+                    Language = "English"
+                },
+                new SongRequest()
+                {
+                    Id = 3,
+                    Artist = "Ascendant Vierge",
+                    Title = "Influenceur",
+                    Genre = "EDM",
+                    Language = "French"
+                },
+                new SongRequest()
+                {
+                    Id = 4,
+                    Artist = "Boys",
+                    Title = "Szalona",
+                    Genre = "Disco polo",
+                    Language = "Polish"
+                },
+                new SongRequest()
+                {
+                    Id = 5,
+                    Artist = "Charles Aznavour",
+                    Title = "For me Formidable",
+                    Genre = "Chanson française",
+                    Language = "-"
+                }
+            };
+
+            foreach (var songRequest in _songRequests)
             {
-                Id = 2,
-                Artist = "And One",
-                Title = "Military fashion show",
-                Genre = "EBM",
-                Language = "English"
-            },
-            new SongRequest()
-            {
-                Id = 3,
-                Artist = "Ascendant Vierge",
-                Title = "Influenceur",
-                Genre = "EDM",
-                Language = "French"
-            },
-            new SongRequest()
-            {
-                Id = 4,
-                Artist = "Boys",
-                Title = "Szalona",
-                Genre = "Disco polo",
-                Language = "Polish"
-            },
-            new SongRequest()
-            {
-                Id = 5,
-                Artist = "Charles Aznavour",
-                Title = "For me Formidable",
-                Genre = "Chanson française",
-                Language = "-"
+                songRequest.CreatedAt = new DateTime(2024, 12, 10);
+                songRequest.UpdatedAt = new DateTime(2024, 12, 10);
             }
-        };
+
+            return _songRequests;
+        }
     }
 }
