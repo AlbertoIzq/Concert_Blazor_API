@@ -19,6 +19,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\Concert.Business\Concert.Business.csproj" />
+    <ProjectReference Include="..\..\Concert.DataAccess\Concert.DataAccess.csproj" />
   </ItemGroup>
 
 </Project>

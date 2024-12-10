@@ -1,4 +1,6 @@
 using Concert.DataAccess.API.Data;
+using Concert.DataAccess.API.Repositories;
+using Concert.DataAccess.Interfaces;
 using DotEnv.Core;
 using Microsoft.EntityFrameworkCore;
 using Scalar.AspNetCore;
@@ -34,6 +36,9 @@ builder.Services.AddOpenApi();
 // Add the database service.
 builder.Services.AddDbContext<ConcertDbContext>(options =>
     options.UseSqlServer(connectionString));
+
+// Add IUnitOfWork service.
+builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 
 var app = builder.Build();
 

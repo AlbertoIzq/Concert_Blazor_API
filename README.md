@@ -24,13 +24,13 @@ _TECHNOLOGIES USED_
 _CONCEPTS USED_
 
 - N-Tier architecture
-- Design patterns:
+- Design patterns: Repository, Unit of work, Dependency injection
 
 _TODO_
 
 - API
   - Add logger
-  - Add Repository => Add GenericRepository => Add UnitOfWork => Add filtering, sorting, pagination => Add Include properties
-  - Add BaseEntity with Id, CreatedAt and UpdatedAt properties
+  - Add Add filtering, sorting, pagination => Add Include properties
+  - Put Update method in Repository, not in Generic Repository
 
 _BUGS_
