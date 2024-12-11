@@ -21,6 +21,7 @@ _TECHNOLOGIES USED_
     - Scalar: Open source API platform used as an API client and to generate user-friendly documentation
     - DotEnv.Core: Manage env. files
 	- Automapper: Object-to-object mapping library
+	- Serilog: Simple .NET logging with fully-structured events
 
 _CONCEPTS USED_
 
@@ -30,8 +31,8 @@ _CONCEPTS USED_
 _TODO_
 
 - API
-  - Add logger
   - Add Add filtering, sorting, pagination => Add Include properties
+  - Add error and exception handling
   - Put Update method in Repository, not in Generic Repository
 
 _BUGS_

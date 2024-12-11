@@ -1,10 +1,13 @@
 using Concert.Business.Mappings;
+using Concert.Business.Constants;
 using Concert.DataAccess.API.Data;
 using Concert.DataAccess.API.Repositories;
 using Concert.DataAccess.Interfaces;
 using DotEnv.Core;
 using Microsoft.EntityFrameworkCore;
 using Scalar.AspNetCore;
+using Serilog;
+using Serilog.Events;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -43,6 +46,21 @@ builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 
 // Add Automapper.
 builder.Services.AddAutoMapper(typeof(AutoMapperProfiles));
+
+// Add Serilog.
+var logger = new LoggerConfiguration()
+    .WriteTo.File(
+        path: BackConstants.API_LOGS_FILE_FULL_PATH,
+        rollingInterval: RollingInterval.Day,
+        retainedFileCountLimit: BackConstants.API_LOGS_MAX_NUM_FILES)
+    .MinimumLevel.Information()
+    // To avoid logging irrelevant information from Microsoft
+    .MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
+    // To log as information from Microsoft only lifetime events
+    .MinimumLevel.Override("Microsoft.Hosting.Lifetime", LogEventLevel.Information)
+    .CreateLogger();
+builder.Logging.ClearProviders();
+builder.Logging.AddSerilog(logger);
 
 var app = builder.Build();
 

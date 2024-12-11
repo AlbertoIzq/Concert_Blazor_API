@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Concert.DataAccess.API.Repositories
 {
-    public class Repository<T> : IRepository<T> where T : class
+    public abstract class Repository<T> : IRepository<T> where T : class
     {
         private readonly ConcertDbContext _concertDbContext;
         private DbSet<T> _dbSet;

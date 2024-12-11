@@ -1,6 +1,7 @@
 ﻿@page "/song-requests"
 @using Concert.Business
 @using Microsoft.AspNetCore.Components.QuickGrid;
+@using Concert.Business.Constants;
 
 <PageTitle>Song requests</PageTitle>
 
@@ -15,9 +16,9 @@
         <div class="page-size-chooser col-2">
             Items per page:
             <select @bind="@paginationState.ItemsPerPage">
-                <option>@Constants.SONGREQUEST_ITEMS_PER_PAGE_OPTION_1</option>
-                <option>@Constants.SONGREQUEST_ITEMS_PER_PAGE_OPTION_2</option>
-                <option>@Constants.SONGREQUEST_ITEMS_PER_PAGE_OPTION_3</option>
+                <option>@FrontConstants.SONGREQUEST_ITEMS_PER_PAGE_OPTION_1</option>
+                <option>@FrontConstants.SONGREQUEST_ITEMS_PER_PAGE_OPTION_2</option>
+                <option>@FrontConstants.SONGREQUEST_ITEMS_PER_PAGE_OPTION_3</option>
             </select>
         </div>
         <div class="page-size-chooser col-2">
@@ -56,7 +57,7 @@
 @code {
     private List<SongRequest>? songRequests;
 
-    private PaginationState paginationState = new PaginationState { ItemsPerPage = Constants.SONGREQUEST_ITEMS_PER_PAGE_OPTION_1 };
+    private PaginationState paginationState = new PaginationState { ItemsPerPage = FrontConstants.SONGREQUEST_ITEMS_PER_PAGE_OPTION_1 };
     
     protected override void OnAfterRender(bool firstRender)
     {
