@@ -27,12 +27,13 @@ _CONCEPTS USED_
 
 - N-Tier architecture
 - Design patterns: Repository, Unit of work, Dependency injection
+- Global exception handling with a middleware
 
 _TODO_
 
 - API
   - Add Add filtering, sorting, pagination => Add Include properties
-  - Add error and exception handling
+  - Extract method from Log messages
   - Put Update method in Repository, not in Generic Repository
 
 _BUGS_

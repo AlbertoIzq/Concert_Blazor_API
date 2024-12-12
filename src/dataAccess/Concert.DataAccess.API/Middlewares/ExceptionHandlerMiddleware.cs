@@ -12,7 +12,7 @@ namespace Concert.DataAccess.API.Middlewares
             RequestDelegate next)
         {
             _logger = logger;
-            this._next = next;
+            _next = next;
         }
 
         public async Task InvokeAsync(HttpContext httpContext)

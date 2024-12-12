@@ -78,6 +78,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseMiddleware<ExceptionHandlerMiddleware>();
+app.UseMiddleware<RouteIdValidationMiddleware>();
 
 app.UseHttpsRedirection();
 
