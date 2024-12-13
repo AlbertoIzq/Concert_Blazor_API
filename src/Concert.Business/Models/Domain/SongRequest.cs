@@ -7,6 +7,7 @@ namespace Concert.Business.Models.Domain
         [Required]
         [MaxLength(100)]
         public string Artist { get; set; }
+        [Required]
         [MaxLength(100)]
         public string Title { get; set; }
         [Required]

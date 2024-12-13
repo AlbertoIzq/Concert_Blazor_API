@@ -16,6 +16,12 @@ namespace Concert.DataAccess.API.Repositories
             _dbSet = _concertDbContext.Set<T>();
         }
 
+        public async Task<T> CreateAsync(T entity)
+        {
+            await _dbSet.AddAsync(entity);
+            return entity;
+        }
+
         public async Task<IEnumerable<T>> GetAllAsync()
         {
             return await _dbSet.ToListAsync();

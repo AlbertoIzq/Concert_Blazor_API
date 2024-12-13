@@ -22,6 +22,28 @@ namespace Concert.DataAccess.API.Controllers
             _logger = logger;
         }
 
+        [ProducesResponseType(StatusCodes.Status201Created)]
+        [HttpPost]
+        public async Task<IActionResult> Create([FromBody] AddSongRequestDto addSongRequestDto)
+        {
+            LoggerHelper<SongRequestsController>.LogCalledEndpoint(_logger, HttpContext);
+
+            // Map or Convert DTO to Domain Model
+            var songRequestDomainModel = _mapper.Map<SongRequest>(addSongRequestDto);
+
+            // Use Domain Model to create Artist
+            songRequestDomainModel = await _unitOfWork.SongRequests.CreateAsync(songRequestDomainModel);
+            await _unitOfWork.SaveAsync();
+
+            // Map Domain Model back to DTO
+            var songRequestDto = _mapper.Map<SongRequestDto>(songRequestDomainModel);
+
+            LoggerHelper<SongRequestsController>.LogResultEndpoint(_logger, HttpContext, "Created", songRequestDto);
+
+            // Show information to the client
+            return CreatedAtAction(nameof(GetById), new { id = songRequestDto.Id }, songRequestDto);
+        }
+
         /// <summary>
         /// GET: api/songrequests
         /// </summary>

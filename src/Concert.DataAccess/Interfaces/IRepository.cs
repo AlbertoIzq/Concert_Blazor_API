@@ -10,6 +10,7 @@ namespace Concert.DataAccess.Interfaces
 {
     public interface IRepository<T> where T : BaseEntity
     {
+        Task<T> CreateAsync(T entity);
         Task<IEnumerable<T>> GetAllAsync();
         Task<T?> GetByIdAsync(int id);
     }

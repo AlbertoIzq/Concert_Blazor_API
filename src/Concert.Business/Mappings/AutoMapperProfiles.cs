@@ -8,6 +8,7 @@ namespace Concert.Business.Mappings
         public AutoMapperProfiles()
         {
             CreateMap<SongRequest, SongRequestDto>().ReverseMap();
+            CreateMap<AddSongRequestDto, SongRequest>();
         }
     }
 }
