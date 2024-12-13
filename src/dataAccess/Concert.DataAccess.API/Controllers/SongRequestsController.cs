@@ -1,5 +1,6 @@
 using AutoMapper;
 using Concert.Business.Models.Domain;
+using Concert.DataAccess.API.Helpers;
 using Concert.DataAccess.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
@@ -29,8 +30,7 @@ namespace Concert.DataAccess.API.Controllers
         [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<IActionResult> GetAll()
         {
-            _logger.LogInformation("Called endpoint '{method}', '{endpoint}'",
-                HttpContext.Request.Method, HttpContext.Request.Path);
+            LoggerHelper<SongRequestsController>.LogCalledEndpoint(_logger, HttpContext);
 
             // Get all song requests
             var songRequestsDomainModel = await _unitOfWork.SongRequests.GetAllAsync();
@@ -38,10 +38,7 @@ namespace Concert.DataAccess.API.Controllers
             // Map Domain Model to DTO
             var songRequestsDto = _mapper.Map<List<SongRequestDto>>(songRequestsDomainModel);
 
-            // Instead of @response you could use as a param JsonSerializer.Serialize(songRequestsDto))
-            // but then the type is not saved in the json
-            _logger.LogInformation("Result endpoint '{method}', '{endpoint}': '{result}', response: {@response}",
-                HttpContext.Request.Method, HttpContext.Request.Path, "OK", songRequestsDto);
+            LoggerHelper<SongRequestsController>.LogResultEndpoint(_logger, HttpContext, "OK", songRequestsDto);
 
             // Return DTO to the client
             return Ok(songRequestsDto);
@@ -59,8 +56,7 @@ namespace Concert.DataAccess.API.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> GetById([FromRoute] int id)
         {
-            _logger.LogInformation("Called endpoint '{method}', '{endpoint}'",
-                HttpContext.Request.Method, HttpContext.Request.Path);
+            LoggerHelper<SongRequestsController>.LogCalledEndpoint(_logger, HttpContext);
 
             // Get data from database - Domain Model
             var songRequestDomainModel = await _unitOfWork.SongRequests.GetByIdAsync(id);
@@ -74,8 +70,7 @@ namespace Concert.DataAccess.API.Controllers
                     Detail = $"The item with id '{id}' couldn't be found."                  
                 };
 
-                _logger.LogInformation("Result endpoint '{method}', '{endpoint}': '{result}', response: {@problemDetails}",
-                    HttpContext.Request.Method, HttpContext.Request.Path, "Not Found", problemDetails);
+                LoggerHelper<SongRequestsController>.LogResultEndpoint(_logger, HttpContext, "Not Found", problemDetails);
 
                 return NotFound(problemDetails);
             }

@@ -1,4 +1,4 @@
-﻿using Concert.Business.Models.Domain;
+﻿using Concert.DataAccess.API.Helpers;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Concert.DataAccess.API.Middlewares
@@ -22,8 +22,7 @@ namespace Concert.DataAccess.API.Middlewares
                 var id = httpContext.Request.RouteValues["id"]?.ToString();
                 if (id is not null && !int.TryParse(id, out _))
                 {
-                    _logger.LogInformation("Called endpoint '{method}', '{endpoint}'",
-                        httpContext.Request.Method, httpContext.Request.Path);
+                    LoggerHelper<RouteIdValidationMiddleware>.LogCalledEndpoint(_logger, httpContext);
 
                     var problemDetails = new ProblemDetails()
                     {
@@ -37,8 +36,7 @@ namespace Concert.DataAccess.API.Middlewares
 
                     await httpContext.Response.WriteAsJsonAsync(problemDetails);
 
-                    _logger.LogInformation("Result endpoint '{method}', '{endpoint}': '{result}', response: {@problemDetails}",
-                        httpContext.Request.Method, httpContext.Request.Path, "Bad Request", problemDetails);
+                    LoggerHelper<RouteIdValidationMiddleware>.LogResultEndpoint(_logger, httpContext, "Bad Request", problemDetails);
 
                     return;
                 }
