@@ -21,8 +21,12 @@ namespace Concert.DataAccess.API.Controllers
             _logger = logger;
         }
 
-        // GET: api/songrequests
+        /// <summary>
+        /// GET: api/songrequests
+        /// </summary>
+        /// <returns></returns>
         [HttpGet]
+        [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<IActionResult> GetAll()
         {
             _logger.LogInformation("Called endpoint '{method}', '{endpoint}'",
@@ -43,13 +47,18 @@ namespace Concert.DataAccess.API.Controllers
             return Ok(songRequestsDto);
         }
 
-        // GET: api/songrequests/{id}
+        /// <summary>
+        /// GET: api/songrequests/{id}
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
         [HttpGet]
         [Route("{id}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> GetById([FromRoute] int id)
         {
-            //_logger.LogInformation("Called endpoint '{endpoint}' with id: {id}",
-            //    "SongRequests.GetById", id);
             _logger.LogInformation("Called endpoint '{method}', '{endpoint}'",
                 HttpContext.Request.Method, HttpContext.Request.Path);
 
