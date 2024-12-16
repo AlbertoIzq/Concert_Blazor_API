@@ -38,9 +38,11 @@ namespace Concert.DataAccess.API.Middlewares
 
                     LoggerHelper<RouteIdValidationMiddleware>.LogResultEndpoint(_logger, httpContext, "Bad Request", problemDetails);
 
+                    // Terminate the pipeline
                     return;
                 }
             }
+            // Continue if the id is valid
             await _next(httpContext);
         }
     }
