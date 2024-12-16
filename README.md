@@ -27,7 +27,10 @@ _CONCEPTS USED_
 
 - N-Tier architecture
 - Design patterns: Repository, Unit of work, Dependency injection
-- Global exception handling with a middleware
+- Middlewares:
+  - Global exception handing
+  - Id route parameter validation
+  - Model validation
 
 _TODO_
 
@@ -35,5 +38,8 @@ _TODO_
   - Add Add filtering, sorting, pagination => Add Include properties
   - Extract method from Log messages
   - Put Update method in Repository, not in Generic Repository
+addincludeProperties to GetById and GetAll
+add tracked and to GetById
+Add validation to Create and AddSongRequestDto
 
 _BUGS_

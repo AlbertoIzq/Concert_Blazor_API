@@ -1,6 +1,7 @@
-using Concert.Business.Mappings;
 using Concert.Business.Constants;
+using Concert.Business.Mappings;
 using Concert.DataAccess.API.Data;
+using Concert.DataAccess.API.Middlewares;
 using Concert.DataAccess.API.Repositories;
 using Concert.DataAccess.Interfaces;
 using DotEnv.Core;
@@ -8,7 +9,6 @@ using Microsoft.EntityFrameworkCore;
 using Scalar.AspNetCore;
 using Serilog;
 using Serilog.Events;
-using Concert.DataAccess.API.Middlewares;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -35,6 +35,7 @@ else if (envName == Environments.Production)
 // Add services to the container.
 
 builder.Services.AddControllers();
+
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 
@@ -42,7 +43,7 @@ builder.Services.AddOpenApi();
 builder.Services.AddDbContext<ConcertDbContext>(options =>
     options.UseSqlServer(connectionString));
 
-// Add IUnitOfWork service.
+// Dependency injection for additional services
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 
 // Add Automapper.
@@ -77,8 +78,10 @@ if (app.Environment.IsDevelopment())
     });
 }
 
+// Middlewares
 app.UseMiddleware<ExceptionHandlerMiddleware>();
 app.UseMiddleware<RouteIdValidationMiddleware>();
+app.UseMiddleware<ModelValidationMiddleware>();
 
 app.UseHttpsRedirection();
 

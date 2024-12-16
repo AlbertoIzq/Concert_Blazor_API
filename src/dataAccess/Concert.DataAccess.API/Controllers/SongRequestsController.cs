@@ -89,7 +89,7 @@ namespace Concert.DataAccess.API.Controllers
                 {
                     Status = StatusCodes.Status404NotFound,
                     Title = "Item not found.",
-                    Detail = $"The item with id '{id}' couldn't be found."                  
+                    Detail = $"The item with id '{id}' couldn't be found."             
                 };
 
                 LoggerHelper<SongRequestsController>.LogResultEndpoint(_logger, HttpContext, "Not Found", problemDetails);
