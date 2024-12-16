@@ -23,6 +23,7 @@ namespace Concert.DataAccess.API.Controllers
         }
 
         [ProducesResponseType(StatusCodes.Status201Created)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] AddSongRequestDto addSongRequestDto)
         {
@@ -93,17 +94,56 @@ namespace Concert.DataAccess.API.Controllers
                 };
 
                 LoggerHelper<SongRequestsController>.LogResultEndpoint(_logger, HttpContext, "Not Found", problemDetails);
-
                 return NotFound(problemDetails);
             }
 
             // Convert Domain Model to DTO
             var songRequestDto = _mapper.Map<SongRequestDto>(songRequestDomainModel);
 
-            _logger.LogInformation("Result endpoint '{method}', '{endpoint}': '{result}', response: {@response}",
-                HttpContext.Request.Method, HttpContext.Request.Path, "OK", songRequestDto);
+            LoggerHelper<SongRequestsController>.LogResultEndpoint(_logger, HttpContext, "Ok", songRequestDto);
 
             // Return DTO back to client
+            return Ok(songRequestDto);
+        }
+
+        /// <summary>
+        /// UPDATE: api/songrequests/{id}
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="updateSongRequestDto"></param>
+        /// <returns></returns>
+        [HttpPut]
+        [Route("{id}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> Update([FromRoute] int id, [FromBody] UpdateSongRequestDto updateSongRequestDto)
+        {
+            LoggerHelper<SongRequestsController>.LogCalledEndpoint(_logger, HttpContext);
+
+            // Map DTO to Domain Model
+            var songRequestDomainModel = _mapper.Map<SongRequest>(updateSongRequestDto);
+            
+            // Update SongRequest if it exists
+            songRequestDomainModel = await _unitOfWork.SongRequests.UpdateAsync(id, songRequestDomainModel);
+            await _unitOfWork.SaveAsync();
+
+            if (songRequestDomainModel == null)
+            {
+                var problemDetails = new ProblemDetails()
+                {
+                    Status = StatusCodes.Status404NotFound,
+                    Title = "Item not found.",
+                    Detail = $"The item with id '{id}' couldn't be found."
+                };
+
+                LoggerHelper<SongRequestsController>.LogResultEndpoint(_logger, HttpContext, "Not Found", problemDetails);
+                return NotFound(problemDetails);
+            }
+            
+            // Convert Domain Model to DTO
+            var songRequestDto = _mapper.Map<SongRequestDto>(songRequestDomainModel);
+
             return Ok(songRequestDto);
         }
     }

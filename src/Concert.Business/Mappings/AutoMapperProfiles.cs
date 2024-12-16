@@ -9,6 +9,7 @@ namespace Concert.Business.Mappings
         {
             CreateMap<SongRequest, SongRequestDto>().ReverseMap();
             CreateMap<AddSongRequestDto, SongRequest>();
+            CreateMap<UpdateSongRequestDto, SongRequest>();
         }
     }
 }
