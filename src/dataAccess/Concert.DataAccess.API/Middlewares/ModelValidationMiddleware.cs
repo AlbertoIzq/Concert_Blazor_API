@@ -109,16 +109,17 @@ namespace Concert.DataAccess.API.Middlewares
         {
             LoggerHelper<ModelValidationMiddleware>.LogCalledEndpoint(_logger, httpContext);
 
-            var problemDetails = new ProblemDetails()
+            var problemDetails = new CustomProblemDetails()
             {
                 Status = StatusCodes.Status400BadRequest,
                 Title = "Bad Request.",
-                Detail = "One or more input validation errors occurred."
+                Detail = "One or more input validation errors occurred.",
+                Errors = errors
             };
 
             httpContext.Response.ContentType = "application/json";
             httpContext.Response.StatusCode = StatusCodes.Status400BadRequest;
-            await httpContext.Response.WriteAsJsonAsync(new { Details = problemDetails, Errors = errors });
+            await httpContext.Response.WriteAsJsonAsync(problemDetails);//new { Details = problemDetails, Errors = errors });
 
             LoggerHelper<ModelValidationMiddleware>.LogResultEndpoint(_logger, httpContext, "Bad Request", problemDetails);
         }
