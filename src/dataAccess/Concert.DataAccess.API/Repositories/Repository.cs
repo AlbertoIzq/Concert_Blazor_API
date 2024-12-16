@@ -18,6 +18,7 @@ namespace Concert.DataAccess.API.Repositories
 
         public async Task<T> CreateAsync(T entity)
         {
+            entity.CreatedAt = DateTime.Now;
             await _dbSet.AddAsync(entity);
             return entity;
         }
