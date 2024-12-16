@@ -144,6 +144,8 @@ namespace Concert.DataAccess.API.Controllers
             // Convert Domain Model to DTO
             var songRequestDto = _mapper.Map<SongRequestDto>(songRequestDomainModel);
 
+            LoggerHelper<SongRequestsController>.LogResultEndpoint(_logger, HttpContext, "Ok", songRequestDto);
+
             return Ok(songRequestDto);
         }
     }

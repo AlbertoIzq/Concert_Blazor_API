@@ -25,10 +25,10 @@ namespace Concert.DataAccess.API.Repositories
             }
 
             // Assign updated values
-            existingSongRequest.Artist = songRequest.Artist;
-            existingSongRequest.Title = songRequest.Title;
-            existingSongRequest.Genre = songRequest.Genre;
-            existingSongRequest.Language = songRequest.Language;
+            if (songRequest.Artist is not null) existingSongRequest.Artist = songRequest.Artist;
+            if (songRequest.Title is not null) existingSongRequest.Title = songRequest.Title;
+            if (songRequest.Genre is not null) existingSongRequest.Genre = songRequest.Genre;
+            if (songRequest.Language is not null) existingSongRequest.Language = songRequest.Language;
             existingSongRequest.UpdatedAt = DateTime.Now;
 
             return existingSongRequest;
