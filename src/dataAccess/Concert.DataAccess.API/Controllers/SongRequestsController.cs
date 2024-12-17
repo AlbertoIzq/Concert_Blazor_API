@@ -148,5 +148,37 @@ namespace Concert.DataAccess.API.Controllers
 
             return Ok(songRequestDto);
         }
+
+        [HttpDelete]
+        [Route("{id}")]
+        public async Task<IActionResult> Delete([FromRoute] int id)
+        {
+            LoggerHelper<SongRequestsController>.LogCalledEndpoint(_logger, HttpContext);
+
+            // Get data from database - Domain Model
+            var songRequestDomainModel = await _unitOfWork.SongRequests.DeleteAsync(id);
+            await _unitOfWork.SaveAsync();
+
+            if (songRequestDomainModel == null)
+            {
+                var problemDetails = new ProblemDetails()
+                {
+                    Status = StatusCodes.Status404NotFound,
+                    Title = "Item not found.",
+                    Detail = $"The item with id '{id}' couldn't be found."
+                };
+
+                LoggerHelper<SongRequestsController>.LogResultEndpoint(_logger, HttpContext, "Not Found", problemDetails);
+                return NotFound(problemDetails);
+            }
+
+            // Convert Domain Model to DTO
+            var songRequestDto = _mapper.Map<SongRequestDto>(songRequestDomainModel);
+
+            LoggerHelper<SongRequestsController>.LogResultEndpoint(_logger, HttpContext, "No Content");
+
+            // Return DTO back to client
+            return NoContent();
+        }
     }
 }

@@ -35,11 +35,11 @@ _CONCEPTS USED_
 _TODO_
 
 - API
-  - Add Add filtering, sorting, pagination => Add Include properties
-  - Extract method from Log messages
-  - Put Update method in Repository, not in Generic Repository
-addincludeProperties to GetById and GetAll
-add tracked and to GetById
-Add validation to Create and AddSongRequestDto
+  - Add Add filtering, sorting, pagination
+  - Add Include properties to Get methods
+  - Add tracked to Get methods
+  - Add RemoveRange to Repository
+  - Implement Soft delete as well by adding variables IsDeleted and DeletedAt to BaseEntity. Have both at the same time with an optional query parameter for hard delete? Only admin can hard delete
+
 
 _BUGS_
