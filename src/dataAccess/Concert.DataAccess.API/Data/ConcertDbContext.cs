@@ -1,5 +1,7 @@
-﻿using Concert.Business.Models.Domain;
+﻿using Concert.Business.Models;
+using Concert.Business.Models.Domain;
 using Microsoft.EntityFrameworkCore;
+using System.Linq.Expressions;
 
 namespace Concert.DataAccess.API.Data
 {
@@ -17,6 +19,25 @@ namespace Concert.DataAccess.API.Data
 
             // Seed to the database
             modelBuilder.Entity<SongRequest>().HasData(SongRequestsIniData());
+
+            // Apply a filter to excluse soft-deleted entities from queries
+            foreach (var entityType in modelBuilder.Model.GetEntityTypes())
+            {
+                var type = entityType.ClrType;
+
+                if (typeof(BaseEntity).IsAssignableFrom(type))
+                {
+                    var parameter = Expression.Parameter(type, "e");
+                    var isDeletedProperty = Expression.Property(parameter, nameof(BaseEntity.IsDeleted));
+                    var filterExpression = Expression.Lambda(
+                        Expression.Not(isDeletedProperty),
+                        parameter
+                    );
+
+                    // Done this way because we need to dynamically cast the entity type for the filter to work
+                    modelBuilder.Entity(type).HasQueryFilter(filterExpression);
+                }
+            }
         }
 
         // Data to seed
@@ -69,7 +90,6 @@ namespace Concert.DataAccess.API.Data
             foreach (var songRequest in _songRequests)
             {
                 songRequest.CreatedAt = new DateTime(2024, 12, 10);
-                songRequest.UpdatedAt = new DateTime(2024, 12, 10);
             }
 
             return _songRequests;

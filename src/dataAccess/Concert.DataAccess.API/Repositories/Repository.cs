@@ -33,7 +33,7 @@ namespace Concert.DataAccess.API.Repositories
             return await _dbSet.FirstOrDefaultAsync(x => x.Id == id);
         }
 
-        public async Task<T?> DeleteAsync(int id)
+        public async Task<T?> HardDeleteAsync(int id)
         {
             // Check if it exists
             var existingEntity = await _dbSet.FirstOrDefaultAsync(x => x.Id == id);
@@ -45,6 +45,23 @@ namespace Concert.DataAccess.API.Repositories
 
             // Delete entity
             _dbSet.Remove(existingEntity);
+
+            return existingEntity;
+        }
+
+        public async Task<T?> SoftDeleteAsync(int id)
+        {
+            // Check if it exists
+            var existingEntity = await _dbSet.FirstOrDefaultAsync(x => x.Id == id);
+
+            if (existingEntity == null)
+            {
+                return null;
+            }
+
+            // Change entity status to deleted
+            existingEntity.IsDeleted = true;
+            existingEntity.DeletedAt = DateTime.Now;
 
             return existingEntity;
         }

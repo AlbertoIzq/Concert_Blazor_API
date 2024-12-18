@@ -26,7 +26,13 @@ _TECHNOLOGIES USED_
 _CONCEPTS USED_
 
 - N-Tier architecture
+- REST (Representational State Transfer)
+- Environment variables
+- DTO (Domain Transfer Object)
+- Asynchronous programming
 - Design patterns: Repository, Unit of work, Dependency injection
+- Logging into a file
+- CRUD operations, with hard and soft deletes
 - Middlewares:
   - Global exception handing
   - Id route parameter validation
@@ -39,7 +45,6 @@ _TODO_
   - Add Include properties to Get methods
   - Add tracked to Get methods
   - Add RemoveRange to Repository
-  - Implement Soft delete as well by adding variables IsDeleted and DeletedAt to BaseEntity. Have both at the same time with an optional query parameter for hard delete? Only admin can hard delete
 
 
 _BUGS_

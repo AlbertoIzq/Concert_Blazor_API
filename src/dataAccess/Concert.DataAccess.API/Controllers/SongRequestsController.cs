@@ -151,12 +151,23 @@ namespace Concert.DataAccess.API.Controllers
 
         [HttpDelete]
         [Route("{id}")]
-        public async Task<IActionResult> Delete([FromRoute] int id)
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> Delete([FromRoute] int id, [FromQuery] bool hardDelete = false)
         {
             LoggerHelper<SongRequestsController>.LogCalledEndpoint(_logger, HttpContext);
 
-            // Get data from database - Domain Model
-            var songRequestDomainModel = await _unitOfWork.SongRequests.DeleteAsync(id);
+            SongRequest? songRequestDomainModel;
+            // Perform a hard or soft delete from database - Domain Model
+            if (hardDelete)
+            {
+                songRequestDomainModel = await _unitOfWork.SongRequests.HardDeleteAsync(id);
+            }
+            else
+            {
+                songRequestDomainModel = await _unitOfWork.SongRequests.SoftDeleteAsync(id);
+            }
             await _unitOfWork.SaveAsync();
 
             if (songRequestDomainModel == null)
