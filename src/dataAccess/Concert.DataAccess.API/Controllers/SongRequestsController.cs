@@ -107,7 +107,7 @@ namespace Concert.DataAccess.API.Controllers
         }
 
         /// <summary>
-        /// UPDATE: api/songrequests/{id}
+        /// PUT: api/songrequests/{id}
         /// </summary>
         /// <param name="id"></param>
         /// <param name="updateSongRequestDto"></param>
@@ -149,6 +149,12 @@ namespace Concert.DataAccess.API.Controllers
             return Ok(songRequestDto);
         }
 
+        /// <summary>
+        /// DELETE: api/songrequests/{id}
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="hardDelete"></param>
+        /// <returns></returns>
         [HttpDelete]
         [Route("{id}")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
@@ -190,6 +196,46 @@ namespace Concert.DataAccess.API.Controllers
 
             // Return DTO back to client
             return NoContent();
+        }
+
+        /// <summary>
+        /// PUT: api/songrequests/{id}/restore
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        [HttpPut]
+        [Route("{id}/restore")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> Restore([FromRoute] int id)
+        {
+            LoggerHelper<SongRequestsController>.LogCalledEndpoint(_logger, HttpContext);
+
+            // Restore from database - Domain Model
+            var songRequestDomainModel = await _unitOfWork.SongRequests.RestoreAsync(id);
+            await _unitOfWork.SaveAsync();
+
+            if (songRequestDomainModel == null)
+            {
+                var problemDetails = new ProblemDetails()
+                {
+                    Status = StatusCodes.Status404NotFound,
+                    Title = "Item not found.",
+                    Detail = $"The item with id '{id}' couldn't be found."
+                };
+
+                LoggerHelper<SongRequestsController>.LogResultEndpoint(_logger, HttpContext, "Not Found", problemDetails);
+                return NotFound(problemDetails);
+            }
+
+            // Convert Domain Model to DTO
+            var songRequestDto = _mapper.Map<SongRequestDto>(songRequestDomainModel);
+
+            LoggerHelper<SongRequestsController>.LogResultEndpoint(_logger, HttpContext, "Ok", songRequestDto);
+
+            // Return DTO back to client
+            return Ok(songRequestDto);
         }
     }
 }

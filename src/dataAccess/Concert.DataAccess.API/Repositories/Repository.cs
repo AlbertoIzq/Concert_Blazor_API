@@ -65,5 +65,22 @@ namespace Concert.DataAccess.API.Repositories
 
             return existingEntity;
         }
+
+        public async Task<T?> RestoreAsync(int id)
+        {
+            // Check if it exists
+            var existingEntity = await _dbSet.IgnoreQueryFilters().FirstOrDefaultAsync(x => x.Id == id);
+
+            if (existingEntity == null)
+            {
+                return null;
+            }
+
+            // Restore entity status back to not deleted
+            existingEntity.IsDeleted = false;
+            existingEntity.DeletedAt = null;
+
+            return existingEntity;
+        }
     }
 }

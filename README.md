@@ -44,7 +44,8 @@ _TODO_
   - Add Add filtering, sorting, pagination
   - Add Include properties to Get methods
   - Add tracked to Get methods
-  - Add RemoveRange to Repository
-
+  - Repository
+    - RestoreAsync: In response distinguish between Not existing entity and Entity already restored scenarios
+	- Add RemoveRange method
 
 _BUGS_
