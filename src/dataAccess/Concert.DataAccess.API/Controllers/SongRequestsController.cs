@@ -189,12 +189,9 @@ namespace Concert.DataAccess.API.Controllers
                 return NotFound(problemDetails);
             }
 
-            // Convert Domain Model to DTO
-            var songRequestDto = _mapper.Map<SongRequestDto>(songRequestDomainModel);
-
             LoggerHelper<SongRequestsController>.LogResultEndpoint(_logger, HttpContext, "No Content");
 
-            // Return DTO back to client
+            // Return No content back to client
             return NoContent();
         }
 
