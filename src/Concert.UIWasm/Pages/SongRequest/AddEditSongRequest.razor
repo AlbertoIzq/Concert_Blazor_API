@@ -1,9 +1,12 @@
 ﻿@page "/song-request/{id:int?}"
+@using Concert.Business.Models.View
 @using Concert.DataAccess.InMemory.Repositories
+@using Concert.UIWasm.Data
 
 <PageTitle>Song requests - Add/Edit</PageTitle>
 
 @inject NavigationManager NavigationManager
+@inject IWebApiExecuter WebApiExecuter
 @inject ISongRequestsRepository SongRequestRepository
 
 @if (Id.HasValue)
@@ -15,6 +18,12 @@ else
     <h3>Add Song request</h3>
 }
 <br />
+@if (!string.IsNullOrEmpty(ErrorMessage))
+{
+    <div>
+        <p class="text-danger">@ErrorMessage</p>
+    </div>
+}
 @if (songRequest is not null)
 {
     <EditForm Model="songRequest" FormName="formSongRequest" OnValidSubmit="Submit">
@@ -76,23 +85,35 @@ else
     [Parameter]
     public int? Id { get; set; }
 
-    [SupplyParameterFromForm]
-    private SongRequest? songRequest { get; set; }
+    private string? ErrorMessage;
 
-    protected override void OnParametersSet()
+    [SupplyParameterFromForm]
+    private SongRequestView? songRequest { get; set; }
+
+    protected override async Task OnParametersSetAsync()
     {
-        if (Id.HasValue)
+        try
         {
-            songRequest ??= SongRequestRepository.GetById(this.Id.Value);
+            if (Id.HasValue)
+            {
+                songRequest ??= await WebApiExecuter.InvokeGet<SongRequestView>($"songrequests/{this.Id.Value}");
+            }
+            else
+            {
+                songRequest ??= new SongRequestView();
+            }
+            ErrorMessage = string.Empty;
         }
-        else
+        catch (WebApiException ex)
         {
-            songRequest ??= new SongRequest();
+            // @todo handle exception
+            ErrorMessage = ex?.ProblemDetails?.Title;
         }
     }
 
     private void Submit()
     {
+        /*        
         if (songRequest is not null)
         {
             if (this.Id.HasValue)
@@ -104,6 +125,7 @@ else
                 SongRequestRepository.Create(songRequest);
             }
         }
-        NavigationManager.NavigateTo($"/song-requests");
+        NavigationManager.NavigateTo("/song-requests");
+         */
     }
 }

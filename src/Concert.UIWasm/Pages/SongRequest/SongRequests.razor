@@ -7,13 +7,10 @@
 
 <PageTitle>Song requests</PageTitle>
 
-@inject NavigationManager NavigationManager
-@inject ISongRequestsRepository SongRequestRepository
 @inject IWebApiExecuter WebApiExecuter
 
 <h3>Song requests</h3>
 <br />
-
 @if(!string.IsNullOrEmpty(ErrorMessage))
 {
     <div>
