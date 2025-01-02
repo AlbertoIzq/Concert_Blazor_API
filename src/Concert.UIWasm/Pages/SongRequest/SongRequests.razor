@@ -58,7 +58,7 @@ else
                 <ChildContent Context="songRequest">
                     <EditForm Model="songRequest"
                     FormName="@($"form-song-request-{songRequest.Id}")"
-                    OnValidSubmit="@(() => { Delete(songRequest.Id); })">
+                    OnValidSubmit="@(async () => { await Delete(songRequest.Id); })">
                         <button type="submit" class="btn btn-danger">
                             <i class="bi bi-trash3"></i> Delete
                         </button>
@@ -68,7 +68,7 @@ else
         </QuickGrid>
     </div>
     <Paginator State="paginationState"></Paginator>
-}
+} 
 
 @code {
     private List<SongRequestView>? songRequests;
@@ -78,13 +78,21 @@ else
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
+        if (firstRender)
+        {
+            await GetAll();
+        }
+    }
+
+    private async Task Delete(int id)
+    {
         try
         {
-            if (firstRender)
+            if (id > 0)
             {
-                songRequests = await WebApiExecuter.InvokeGet<List<SongRequestView>>("songrequests");
-                ErrorMessage = string.Empty;
-                StateHasChanged();
+                await WebApiExecuter.InvokeDelete($"songrequests/{id}");
+                // Used to refresh the page
+                await GetAll();
             }
         }
         catch (WebApiException ex)
@@ -94,13 +102,18 @@ else
         }
     }
 
-    private void Delete(int id)
+    private async Task GetAll()
     {
-        if (id > 0)
+        try
         {
-            SongRequestRepository.Delete(id);
-            // Used to refresh the page
-            //NavigationManager.NavigateTo("/song-requests", true);
+            songRequests = await WebApiExecuter.InvokeGet<List<SongRequestView>>("songrequests");
+            ErrorMessage = string.Empty;
+            StateHasChanged();
+        }
+        catch (WebApiException ex)
+        {
+            // @todo handle exception
+            ErrorMessage = ex?.ProblemDetails?.Title;
         }
     }
 }

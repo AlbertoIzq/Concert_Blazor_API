@@ -21,6 +21,14 @@ namespace Concert.UIWasm.Data
             return await httpResponse.Content.ReadFromJsonAsync<T>();
         }
 
+        public async Task InvokeDelete(string relativeUrl)
+        {
+            var httpRequest = new HttpRequestMessage(HttpMethod.Delete, relativeUrl);
+            var httpResponse = await _httpClient.SendAsync(httpRequest);
+
+            await HandlePotentialError(httpResponse);
+        }
+
         private async Task HandlePotentialError(HttpResponseMessage httpResponse)
         {
             if (!httpResponse.IsSuccessStatusCode)
