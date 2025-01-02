@@ -35,6 +35,18 @@ namespace Concert.UIWasm.Data
             return await httpResponse.Content.ReadFromJsonAsync<T>();
         }
 
+        public async Task InvokePut<T>(string relativeUrl, T obj)
+        {
+            var httpRequest = new HttpRequestMessage(HttpMethod.Put, relativeUrl)
+            {
+                Content = new StringContent(JsonSerializer.Serialize(obj), Encoding.UTF8, "application/json")
+            };
+            // You could also do: var httpResponse = await _httpClient.PutAsJsonAsync(relativeUrl, obj);
+            var httpResponse = await _httpClient.SendAsync(httpRequest);
+
+            await HandlePotentialError(httpResponse);
+        }
+
         public async Task InvokeDelete(string relativeUrl)
         {
             var httpRequest = new HttpRequestMessage(HttpMethod.Delete, relativeUrl);

@@ -7,7 +7,6 @@
 
 @inject NavigationManager NavigationManager
 @inject IWebApiExecuter WebApiExecuter
-@inject ISongRequestsRepository SongRequestRepository
 
 @if (Id.HasValue)
 {
@@ -119,13 +118,14 @@ else
             {
                 if (this.Id.HasValue)
                 {
-                    //SongRequestRepository.Update(songRequest.Id, songRequest);
+                    await WebApiExecuter.InvokePut<SongRequestView>($"songrequests/{this.Id.Value}", songRequest);
                 }
                 else
                 {
                     await WebApiExecuter.InvokePost<SongRequestView>($"songrequests", songRequest);
                 }
             }
+            ErrorMessage = string.Empty;
             NavigationManager.NavigateTo("/song-requests");
         }
         catch (WebApiException ex)
