@@ -13,7 +13,20 @@
 
 <h3>Song requests</h3>
 <br />
-@if (songRequests is not null)
+
+@if(!string.IsNullOrEmpty(ErrorMessage))
+{
+    <div>
+        <p class="text-danger">@ErrorMessage</p>
+    </div>  
+}
+@if(songRequests is null)
+{
+    <div>
+        <p><em>Loading...</em></p>
+    </div>
+}
+else
 {
     <div class="row">
         <div class="page-size-chooser col-2">
@@ -56,10 +69,6 @@
     </div>
     <Paginator State="paginationState"></Paginator>
 }
-else
-{
-    <p class="text-danger">@ErrorMessage</p>
-}
 
 @code {
     private List<SongRequestView>? songRequests;
@@ -74,6 +83,7 @@ else
             if (firstRender)
             {
                 songRequests = await WebApiExecuter.InvokeGet<List<SongRequestView>>("songrequests");
+                ErrorMessage = string.Empty;
                 StateHasChanged();
             }
         }
