@@ -1,4 +1,6 @@
 ﻿using System.Net.Http.Json;
+using System.Text;
+using System.Text.Json;
 
 namespace Concert.UIWasm.Data
 {
@@ -9,6 +11,18 @@ namespace Concert.UIWasm.Data
         public WebApiExecuter(HttpClient httpClient)
         {
             _httpClient = httpClient;
+        }
+
+        public async Task InvokePost<T>(string relativeUrl, T obj)
+        {
+            var httpRequest = new HttpRequestMessage(HttpMethod.Post, relativeUrl)
+            {
+                Content = new StringContent(JsonSerializer.Serialize(obj), Encoding.UTF8, "application/json")
+            };
+            // You could also do: var httpResponse = await _httpClient.PostAsJsonAsync(relativeUrl, obj);
+            var httpResponse = await _httpClient.SendAsync(httpRequest);
+
+            await HandlePotentialError(httpResponse);
         }
 
         public async Task<T?> InvokeGet<T>(string relativeUrl)

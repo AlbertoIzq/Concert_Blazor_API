@@ -51,3 +51,6 @@ _TODO_
   - If API calls also for authorization, create HttpClientFactory
 
 _BUGS_
+
+- Blazor
+  - If API not running, error when fetching SongRequest

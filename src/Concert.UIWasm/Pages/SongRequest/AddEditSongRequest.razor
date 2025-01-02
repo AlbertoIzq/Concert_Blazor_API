@@ -111,21 +111,27 @@ else
         }
     }
 
-    private void Submit()
-    {
-        /*        
-        if (songRequest is not null)
+    private async Task Submit()
+    {  
+        try
         {
-            if (this.Id.HasValue)
+            if (songRequest is not null)
             {
-                SongRequestRepository.Update(songRequest.Id, songRequest);
+                if (this.Id.HasValue)
+                {
+                    //SongRequestRepository.Update(songRequest.Id, songRequest);
+                }
+                else
+                {
+                    await WebApiExecuter.InvokePost<SongRequestView>($"songrequests", songRequest);
+                }
             }
-            else
-            {
-                SongRequestRepository.Create(songRequest);
-            }
+            NavigationManager.NavigateTo("/song-requests");
         }
-        NavigationManager.NavigateTo("/song-requests");
-         */
+        catch (WebApiException ex)
+        {
+            // @todo handle exception
+            ErrorMessage = ex?.ProblemDetails?.Title;
+        }
     }
 }
