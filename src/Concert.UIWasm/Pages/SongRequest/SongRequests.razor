@@ -1,12 +1,15 @@
 ﻿@page "/song-requests"
 @using Concert.Business
+@using Concert.Business.Models.View
 @using Microsoft.AspNetCore.Components.QuickGrid;
 @using Concert.Business.Constants;
+@using Data;
 
 <PageTitle>Song requests</PageTitle>
 
 @inject NavigationManager NavigationManager
 @inject ISongRequestsRepository SongRequestRepository
+@inject IWebApiExecuter WebApiExecuter
 
 <h3>Song requests</h3>
 <br />
@@ -41,8 +44,8 @@
             <TemplateColumn>
                 <ChildContent Context="songRequest">
                     <EditForm Model="songRequest"
-                              FormName="@($"form-song-request-{songRequest.Id}")"
-                              OnValidSubmit="@(() => { Delete(songRequest.Id); })">
+                    FormName="@($"form-song-request-{songRequest.Id}")"
+                    OnValidSubmit="@(() => { Delete(songRequest.Id); })">
                         <button type="submit" class="btn btn-danger">
                             <i class="bi bi-trash3"></i> Delete
                         </button>
@@ -53,18 +56,31 @@
     </div>
     <Paginator State="paginationState"></Paginator>
 }
+else
+{
+    <p class="text-danger">@ErrorMessage</p>
+}
 
 @code {
-    private List<SongRequest>? songRequests;
+    private List<SongRequestView>? songRequests;
+    private string? ErrorMessage;
 
     private PaginationState paginationState = new PaginationState { ItemsPerPage = FrontConstants.SONGREQUEST_ITEMS_PER_PAGE_OPTION_1 };
-    
-    protected override void OnAfterRender(bool firstRender)
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        if (firstRender)
+        try
         {
-            songRequests = SongRequestRepository.GetAll();
-            StateHasChanged();
+            if (firstRender)
+            {
+                songRequests = await WebApiExecuter.InvokeGet<List<SongRequestView>>("songrequests");
+                StateHasChanged();
+            }
+        }
+        catch (WebApiException ex)
+        {
+            // @todo handle exception
+            ErrorMessage = ex?.ProblemDetails?.Title;
         }
     }
 

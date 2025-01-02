@@ -47,5 +47,7 @@ _TODO_
   - Repository
     - RestoreAsync: In response distinguish between Not existing entity and Entity already restored scenarios
 	- Add RemoveRange method
+- Blazor
+  - If API calls also for authorization, create HttpClientFactory
 
 _BUGS_

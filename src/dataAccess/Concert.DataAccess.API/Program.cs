@@ -36,6 +36,24 @@ else if (envName == Environments.Production)
 
 builder.Services.AddControllers();
 
+// Configure Cors (Cross-origin resource sharing) to allow API requests from the frontend
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAll", builder =>
+    {
+        builder.AllowAnyOrigin()
+               .AllowAnyMethod()
+               .AllowAnyHeader();
+    });
+
+    options.AddPolicy("AllowBlazorApp", builder =>
+    {
+        builder.WithOrigins("https://localhost:7079", "http://localhost:5155")
+               .AllowAnyMethod()
+               .AllowAnyHeader();
+    });
+});
+
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 
@@ -65,6 +83,9 @@ builder.Logging.ClearProviders();
 builder.Logging.AddSerilog(logger);
 
 var app = builder.Build();
+
+// Use the CORS policy
+app.UseCors("AllowBlazorApp");
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
