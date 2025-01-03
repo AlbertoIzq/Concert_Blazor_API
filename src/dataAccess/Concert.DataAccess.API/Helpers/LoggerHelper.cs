@@ -1,8 +1,4 @@
-﻿using Concert.Business.Models.Domain;
-using Concert.DataAccess.API.Controllers;
-using Microsoft.AspNetCore.Mvc;
-
-namespace Concert.DataAccess.API.Helpers
+﻿namespace Concert.DataAccess.API.Helpers
 {
     public static class LoggerHelper<T> where T : class
     {
@@ -26,7 +22,13 @@ namespace Concert.DataAccess.API.Helpers
                 logger.LogInformation("Result endpoint '{method}', '{endpoint}': '{result}'",
                 httpContext.Request.Method, httpContext.Request.Path, result);
             }
-            
+        }
+
+        public static void LogException(ILogger<T> logger, HttpContext httpContext, Exception ex)
+        {
+            logger.LogError("Exception message: {ex.Message}, Exception: {@ex}," +
+                "RequestMethod: {@httpContext.Request.Method}, RequestPath: {@httpContext.Request.Path}",
+                ex.Message, ex, httpContext.Request.Method, httpContext.Request.Path);
         }
     }
 }

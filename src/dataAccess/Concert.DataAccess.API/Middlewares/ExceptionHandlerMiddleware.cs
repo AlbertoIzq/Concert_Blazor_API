@@ -1,5 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using System.Net;
+﻿using Concert.DataAccess.API.Helpers;
+using Microsoft.AspNetCore.Mvc;
 
 namespace Concert.DataAccess.API.Middlewares
 {
@@ -29,9 +29,7 @@ namespace Concert.DataAccess.API.Middlewares
 
         private Task HandleExceptionAsync(HttpContext httpContext, Exception ex)
         {
-            _logger.LogError("Exception: {ex.Message}, Exception: {@ex}," +
-                "RequestMethod: {@httpContext.Request.Method}, RequestPath: {@httpContext.Request.Path}",
-                ex.Message, ex, httpContext.Request.Method, httpContext.Request.Path);
+            LoggerHelper<ExceptionHandlerMiddleware>.LogException(_logger, httpContext, ex);
 
             var problemDetails = new ProblemDetails()
             {
