@@ -1,5 +1,4 @@
 ﻿using Concert.DataAccess.API.Helpers;
-using Microsoft.AspNetCore.Mvc;
 using System.ComponentModel.DataAnnotations;
 using System.Reflection;
 using System.Text.Json;
@@ -119,7 +118,7 @@ namespace Concert.DataAccess.API.Middlewares
 
             httpContext.Response.ContentType = "application/json";
             httpContext.Response.StatusCode = StatusCodes.Status400BadRequest;
-            await httpContext.Response.WriteAsJsonAsync(problemDetails);//new { Details = problemDetails, Errors = errors });
+            await httpContext.Response.WriteAsJsonAsync(problemDetails);
 
             LoggerHelper<ModelValidationMiddleware>.LogResultEndpoint(_logger, httpContext, "Bad Request", problemDetails);
         }

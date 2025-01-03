@@ -11,13 +11,13 @@
 
 <h3>Song requests</h3>
 <br />
-@if(!string.IsNullOrEmpty(ErrorMessage))
+@if(!string.IsNullOrEmpty(errorMessage))
 {
     <div>
-        <p class="text-danger">@ErrorMessage</p>
+        <p class="text-danger">@errorMessage</p>
     </div>  
 }
-@if(songRequests is null)
+else if(songRequests is null)
 {
     <div>
         <p><em>Loading...</em></p>
@@ -69,7 +69,7 @@ else
 
 @code {
     private List<SongRequestView>? songRequests;
-    private string? ErrorMessage;
+    private string? errorMessage = string.Empty;
 
     private PaginationState paginationState = new PaginationState { ItemsPerPage = FrontConstants.SONGREQUEST_ITEMS_PER_PAGE_OPTION_1 };
 
@@ -92,10 +92,13 @@ else
                 await GetAll();
             }
         }
-        catch (WebApiException ex)
+        catch (Exception ex)
         {
-            // @todo handle exception
-            ErrorMessage = ex?.ProblemDetails?.Title;
+            errorMessage = ex.Message;
+        }
+        finally
+        {
+            StateHasChanged();
         }
     }
 
@@ -104,13 +107,15 @@ else
         try
         {
             songRequests = await WebApiExecuter.InvokeGet<List<SongRequestView>>("songrequests");
-            ErrorMessage = string.Empty;
-            StateHasChanged();
+            errorMessage = string.Empty;
         }
-        catch (WebApiException ex)
+        catch (Exception ex)
         {
-            // @todo handle exception
-            ErrorMessage = ex?.ProblemDetails?.Title;
+            errorMessage = ex.Message;
+        }
+        finally
+        {
+            StateHasChanged();
         }
     }
 }

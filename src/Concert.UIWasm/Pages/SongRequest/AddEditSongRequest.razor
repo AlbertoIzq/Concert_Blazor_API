@@ -1,6 +1,5 @@
 ﻿@page "/song-request/{id:int?}"
 @using Concert.Business.Models.View
-@using Concert.DataAccess.InMemory.Repositories
 @using Concert.UIWasm.Data
 
 <PageTitle>Song requests - Add/Edit</PageTitle>
@@ -17,13 +16,19 @@ else
     <h3>Add Song request</h3>
 }
 <br />
-@if (!string.IsNullOrEmpty(ErrorMessage))
+@if (!string.IsNullOrEmpty(errorMessage))
 {
     <div>
-        <p class="text-danger">@ErrorMessage</p>
+        <p class="text-danger">@errorMessage</p>
     </div>
 }
-@if (songRequest is not null)
+else if (songRequest is null)
+{
+    <div>
+        <p><em>Loading...</em></p>
+    </div>
+}
+else
 {
     <EditForm Model="songRequest" FormName="formSongRequest" OnValidSubmit="Submit">
         <DataAnnotationsValidator></DataAnnotationsValidator>
@@ -84,7 +89,7 @@ else
     [Parameter]
     public int? Id { get; set; }
 
-    private string? ErrorMessage;
+    private string? errorMessage = string.Empty;
 
     [SupplyParameterFromForm]
     private SongRequestView? songRequest { get; set; }
@@ -101,12 +106,15 @@ else
             {
                 songRequest ??= new SongRequestView();
             }
-            ErrorMessage = string.Empty;
+            errorMessage = string.Empty;
         }
-        catch (WebApiException ex)
+        catch (Exception ex)
         {
-            // @todo handle exception
-            ErrorMessage = ex?.ProblemDetails?.Title;
+            errorMessage = ex.Message;
+        }
+        finally
+        {
+            StateHasChanged();
         }
     }
 
@@ -125,13 +133,16 @@ else
                     await WebApiExecuter.InvokePost<SongRequestView>($"songrequests", songRequest);
                 }
             }
-            ErrorMessage = string.Empty;
+            errorMessage = string.Empty;
             NavigationManager.NavigateTo("/song-requests");
         }
-        catch (WebApiException ex)
+        catch (Exception ex)
         {
-            // @todo handle exception
-            ErrorMessage = ex?.ProblemDetails?.Title;
+            errorMessage = ex.Message;
+        }
+        finally
+        {
+            StateHasChanged();
         }
     }
 }

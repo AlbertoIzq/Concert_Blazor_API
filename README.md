@@ -25,18 +25,24 @@ _TECHNOLOGIES USED_
 
 _CONCEPTS USED_
 
-- N-Tier architecture
-- REST (Representational State Transfer)
-- Environment variables
-- DTO (Domain Transfer Object)
-- Asynchronous programming
-- Design patterns: Repository, Unit of work, Dependency injection
-- Logging into a file
-- CRUD operations, with hard and soft deletes
-- Middlewares:
-  - Global exception handing
-  - Id route parameter validation
-  - Model validation
+- GENERAL
+  - N-Tier architecture
+  - Environment variables
+  - DTO (Domain Transfer Object)
+  - Asynchronous programming
+
+- BACKEND
+  - CRUD operations, with hard and soft deletes
+  - Middlewares:
+    - Global exception handing
+    - Id route parameter validation
+    - Model validation
+  - Logging into a file
+
+- FRONTEND
+  - REST API (Representational State Transfer)
+  - Design patterns: Repository, Unit of work, Dependency injection
+  - Exception handling in API calls
 
 _TODO_
 
@@ -49,6 +55,8 @@ _TODO_
 	- Add RemoveRange method
 - Blazor
   - If API calls also for authorization, create HttpClientFactory
+  - Add retry policy with Polly
+  - Add logging, log exceptions
 
 _BUGS_
 
