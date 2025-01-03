@@ -12,6 +12,7 @@ _TECHNOLOGIES USED_
   - Bootstrap: CSS Framework for developing responsive and mobile-first websites
   - C# libraries:
     - Quickgrid: Razor component for quickly and efficiently displaying data in tabular form
+    - Serilog: Simple .NET logging with fully-structured events
 
 - BACKEND
   - ASP .NET Core Web API: .NET framework for building HTTP-based APIs (RESTful web services)
@@ -26,10 +27,23 @@ _TECHNOLOGIES USED_
 _CONCEPTS USED_
 
 - GENERAL
-  - N-Tier architecture
+  - N-Tier architecture:
+    - DataAccess: 
+	  - DataAccess: Class library project with interfaces
+	  - DataAccess.API: .NET CORE Web API project
+	  - DataAccess.InMemory: Class library project with an in-memory database used as a PoC (Proof Of Concept)
+	- UIWasm: Blazor WebAssembly standalone project
+	- Business: Class library project with business logic
+	- Shared: Class library project with shared functionality
   - Environment variables
   - DTO (Domain Transfer Object)
   - Asynchronous programming
+
+- FRONTEND
+  - REST API (Representational State Transfer)
+  - Design patterns: Repository, Unit of work, Dependency injection
+  - Exception handling in API calls
+  - Logging Exceptions into BrowserConsole
 
 - BACKEND
   - CRUD operations, with hard and soft deletes
@@ -37,28 +51,28 @@ _CONCEPTS USED_
     - Global exception handing
     - Id route parameter validation
     - Model validation
-  - Logging into a file
-
-- FRONTEND
-  - REST API (Representational State Transfer)
-  - Design patterns: Repository, Unit of work, Dependency injection
-  - Exception handling in API calls
+  - Logging into a file:
+    - Exceptions
+	- API requests
+	- API responses
 
 _TODO_
 
-- API
+- FRONTEND
+  - If API calls also for authorization, create HttpClientFactory
+  - Add retry policy with Polly
+  - Add logging to API requests and responses
+  - Send logs to a backend API for centralized storage.
+
+- BACKEND
   - Add Add filtering, sorting, pagination
   - Add Include properties to Get methods
   - Add tracked to Get methods
   - Repository
     - RestoreAsync: In response distinguish between Not existing entity and Entity already restored scenarios
 	- Add RemoveRange method
-- Blazor
-  - If API calls also for authorization, create HttpClientFactory
-  - Add retry policy with Polly
-  - Add logging, log exceptions
-
+ 
 _BUGS_
 
-- Blazor
+- FRONTEND
   - If API not running, error when fetching SongRequest
