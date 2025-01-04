@@ -6,6 +6,7 @@
 
 @inject NavigationManager NavigationManager
 @inject IWebApiExecuter WebApiExecuter
+@inject IToastService ToastService
 
 @if (Id.HasValue)
 {
@@ -33,12 +34,10 @@ else
     <EditForm Model="songRequest" FormName="formSongRequest" OnValidSubmit="Submit">
         <DataAnnotationsValidator></DataAnnotationsValidator>
         <ValidationSummary></ValidationSummary>
-
         @if (songRequest.Id > 0)
         {
             <InputNumber @bind-Value="songRequest.Id" hidden></InputNumber>
         }
-
         <FieldComponent Label="Artist">
             <Control>
                 <InputText @bind-Value="songRequest.Artist" class="form-control"></InputText>
@@ -86,8 +85,8 @@ else
 }
 
 @code {
-        [Parameter]
-        public int? Id { get; set; }
+    [Parameter]
+    public int? Id { get; set; }
 
     private string? errorMessage = string.Empty;
 
@@ -127,10 +126,12 @@ else
                 if (this.Id.HasValue)
                 {
                     await WebApiExecuter.InvokePut<SongRequestView>($"songrequests/{this.Id.Value}", songRequest);
+                    ToastService.ShowSuccess("SongRequest updated successfully");
                 }
                 else
                 {
                     await WebApiExecuter.InvokePost<SongRequestView>($"songrequests", songRequest);
+                    ToastService.ShowSuccess("SongRequest created successfully");
                 }
             }
             errorMessage = string.Empty;

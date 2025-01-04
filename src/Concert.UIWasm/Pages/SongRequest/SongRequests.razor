@@ -8,6 +8,7 @@
 <PageTitle>Song requests</PageTitle>
 
 @inject IWebApiExecuter WebApiExecuter
+@inject IToastService ToastService
 
 <h3>Song requests</h3>
 <br />
@@ -88,6 +89,7 @@ else
             if (id > 0)
             {
                 await WebApiExecuter.InvokeDelete($"songrequests/{id}");
+                ToastService.ShowSuccess("SongRequest deleted successfully");
                 // Used to refresh the page
                 await GetAll();
             }
