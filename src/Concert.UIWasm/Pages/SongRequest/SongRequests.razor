@@ -69,6 +69,9 @@ else
 } 
 
 @code {
+    [CascadingParameter]
+    public IModalService ModalService { get; set; }
+
     private List<SongRequestView>? songRequests;
     private string? errorMessage = string.Empty;
 
@@ -88,10 +91,14 @@ else
         {
             if (id > 0)
             {
-                await WebApiExecuter.InvokeDelete($"songrequests/{id}");
-                ToastService.ShowSuccess("SongRequest deleted successfully");
-                // Used to refresh the page
-                await GetAll();
+                var result = await ShowModal();
+                if (result.Confirmed)
+                {
+                    await WebApiExecuter.InvokeDelete($"songrequests/{id}");
+                    ToastService.ShowSuccess("SongRequest deleted successfully");
+                    // Used to refresh the page
+                    await GetAll();
+                }
             }
         }
         catch (Exception ex)
@@ -119,5 +126,19 @@ else
         {
             StateHasChanged();
         }
+    }
+
+    private async Task<ModalResult> ShowModal()
+    {
+        var modalOptions = new ModalOptions() { HideCloseButton = true }; // Hides the "X" button
+
+        var modalParameters = new ModalParameters();
+        var title = "Are you sure?";
+        modalParameters.Add("Message", "You won't be able to revert this!");
+        modalParameters.Add("ConfirmButton", "Yes, delete it");
+        modalParameters.Add("CancelButton", "Cancel");
+
+        var modal = ModalService.Show<ConfirmationModalComponent>(title, modalParameters, modalOptions);
+        return await modal.Result;
     }
 }

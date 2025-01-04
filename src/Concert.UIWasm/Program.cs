@@ -1,3 +1,4 @@
+using Blazored.Modal;
 using Blazored.Toast;
 using Concert.UIWasm;
 using Concert.UIWasm.Data;
@@ -19,8 +20,9 @@ builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri("https:/
 // Dependency injection for additional services
 builder.Services.AddScoped<IWebApiExecuter, WebApiExecuter>();
 
-// Add toast component.
+// Add components.
 builder.Services.AddBlazoredToast();
+builder.Services.AddBlazoredModal();
 
 // Add Serilog.
 Log.Logger = new LoggerConfiguration()

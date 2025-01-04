@@ -13,6 +13,8 @@ _TECHNOLOGIES USED_
   - C# libraries:
     - Quickgrid: Razor component for quickly and efficiently displaying data in tabular form
     - Serilog: Simple .NET logging with fully-structured events
+	- Blazored.Toast: Toast notifications
+	- Blazored.Modal: Modal messages
 
 - BACKEND
   - ASP .NET Core Web API: .NET framework for building HTTP-based APIs (RESTful web services)
@@ -44,6 +46,8 @@ _CONCEPTS USED_
   - Design patterns: Repository, Unit of work, Dependency injection
   - Exception handling in API calls
   - Logging Exceptions into BrowserConsole
+  - Toast notifications
+  - Modal messages
 
 - BACKEND
   - CRUD operations, with hard and soft deletes

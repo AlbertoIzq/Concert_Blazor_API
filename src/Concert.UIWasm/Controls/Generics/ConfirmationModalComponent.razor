@@ -1,0 +1,32 @@
+﻿@inject IModalService ModalService
+
+<div class="modal-content">
+    <div class="modal-body">
+        <p>@Message</p>
+    </div>
+    <div class="modal-footer d-flex justify-content-between">
+        <button class="btn btn-primary" @onclick="OnConfirm">@ConfirmButton</button>
+        <button class="btn btn-secondary" @onclick="OnCancel">@CancelButton</button>
+    </div>
+</div>
+
+@code {
+    [CascadingParameter]
+    BlazoredModalInstance ModalInstance { get; set; }
+    [Parameter]
+    public string Message { get; set; }
+    [Parameter]
+    public string ConfirmButton { get; set; }
+    [Parameter]
+    public string CancelButton { get; set; }
+
+    private void OnConfirm()
+    {
+        ModalInstance.CloseAsync(ModalResult.Ok(true));
+    }
+
+    private void OnCancel()
+    {
+        ModalInstance.CloseAsync(ModalResult.Cancel());
+    }
+}
