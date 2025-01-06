@@ -7,7 +7,7 @@ namespace Concert.DataAccess.API.Data
 {
     public class ConcertDbContext : DbContext
     {
-        public ConcertDbContext(DbContextOptions dbContextOptions) : base(dbContextOptions)
+        public ConcertDbContext(DbContextOptions<ConcertDbContext> dbContextOptions) : base(dbContextOptions)
         {
         }
 

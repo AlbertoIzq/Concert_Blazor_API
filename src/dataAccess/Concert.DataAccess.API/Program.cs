@@ -23,16 +23,19 @@ string envName = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
 new EnvLoader().Load();
 var envVarReader = new EnvReader();
 
-// Get connectionString.
+// Get connection strings
 string connectionString = string.Empty;
+string connectionStringAuth = string.Empty;
 
 if (envName == Environments.Development)
 {
     connectionString = envVarReader["DataBase_ConnectionString"];
+    connectionStringAuth = envVarReader["DataBaseAuth_ConnectionString"];
 }
 else if (envName == Environments.Production)
 {
     connectionString = Environment.GetEnvironmentVariable("DataBase_ConnectionString");
+    connectionStringAuth = Environment.GetEnvironmentVariable("DataBaseAuth_ConnectionString");
 }
 
 // Get JWT parameters
@@ -65,9 +68,11 @@ builder.Services.AddCors(options =>
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 
-// Add the database service.
+// Add the database services.
 builder.Services.AddDbContext<ConcertDbContext>(options =>
     options.UseSqlServer(connectionString));
+builder.Services.AddDbContext<ConcertAuthDbContext>(options =>
+    options.UseSqlServer(connectionStringAuth));
 
 // Dependency injection for additional services
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
