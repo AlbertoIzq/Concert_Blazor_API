@@ -2,12 +2,14 @@ using AutoMapper;
 using Concert.Business.Models.Domain;
 using Concert.DataAccess.API.Helpers;
 using Concert.DataAccess.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Concert.DataAccess.API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize]
     public class SongRequestsController : ControllerBase
     {
         private readonly IUnitOfWork _unitOfWork;

@@ -5,10 +5,13 @@ using Concert.DataAccess.API.Middlewares;
 using Concert.DataAccess.API.Repositories;
 using Concert.DataAccess.Interfaces;
 using DotEnv.Core;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using Scalar.AspNetCore;
 using Serilog;
 using Serilog.Events;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -31,6 +34,11 @@ else if (envName == Environments.Production)
 {
     connectionString = Environment.GetEnvironmentVariable("DataBase_ConnectionString");
 }
+
+// Get JWT parameters
+string jwtSecretKey = envVarReader["Jwt_SecretKey"];
+string jwtIssuer = envVarReader["Jwt_Issuer"];
+string jwtAudience = envVarReader["Jwt_Audience"];
 
 // Add services to the container.
 
@@ -66,6 +74,20 @@ builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 
 // Add Automapper.
 builder.Services.AddAutoMapper(typeof(AutoMapperProfiles));
+
+// Add JWT Authentication
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    options.TokenValidationParameters = new TokenValidationParameters
+    {
+        ValidateIssuer = true,
+        ValidateAudience = true,
+        ValidateLifetime = true,
+        ValidateIssuerSigningKey = true,
+        ValidIssuer = jwtIssuer,
+        ValidAudience = jwtAudience,
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSecretKey))
+    });
 
 // Add Serilog.
 var logger = new LoggerConfiguration()
@@ -106,6 +128,7 @@ app.UseMiddleware<ModelValidationMiddleware>();
 
 app.UseHttpsRedirection();
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();

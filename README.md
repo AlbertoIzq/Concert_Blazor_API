@@ -75,6 +75,7 @@ _TODO_
   - Repository
     - RestoreAsync: In response distinguish between Not existing entity and Entity already restored scenarios
 	- Add RemoveRange method
+  - Implement refresh token as well
  
 _BUGS_
 
