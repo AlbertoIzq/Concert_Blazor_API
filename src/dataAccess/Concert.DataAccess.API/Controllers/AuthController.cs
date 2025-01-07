@@ -1,9 +1,9 @@
 using Concert.Business.Models.Domain;
 using Concert.DataAccess.API.Filters.ActionFilters;
 using Concert.DataAccess.API.Helpers;
+using Concert.DataAccess.Interfaces;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using System.Text.Json;
 
 namespace Concert.DataAccess.API.Controllers
 {
@@ -12,12 +12,14 @@ namespace Concert.DataAccess.API.Controllers
     public class AuthController : ControllerBase
     {
         private readonly UserManager<IdentityUser> _userManager;
+        private readonly IAuthRepository _authRepository;
         private readonly ILogger<AuthController> _logger;
 
-        public AuthController(UserManager<IdentityUser> userManager,
+        public AuthController(UserManager<IdentityUser> userManager, IAuthRepository authRepository,
             ILogger<AuthController> logger)
         {
             _userManager = userManager;
+            _authRepository = authRepository;
             _logger = logger;
         }
 
@@ -81,10 +83,21 @@ namespace Concert.DataAccess.API.Controllers
 
                 if (checkPasswordResult)
                 {
-                    // Create Token
-                    /// @todo
-                    LoggerHelper<AuthController>.LogResultEndpoint(_logger, HttpContext, "Ok", "Ok");
-                    return Ok();
+                    // Get roles for this user
+                    var roles = await _userManager.GetRolesAsync(identityUser);
+
+                    if (roles is not null)
+                    {
+                        // Create JWT Token
+                        var jwtToken = _authRepository.CreateJWTToken(identityUser, roles.ToList());
+                        var response = new LoginResponseDto
+                        {
+                            JwtToken = jwtToken
+                        };
+
+                        LoggerHelper<AuthController>.LogResultEndpoint(_logger, HttpContext, "Ok", response);
+                        return Ok(response);
+                    }
                 }
             }
 

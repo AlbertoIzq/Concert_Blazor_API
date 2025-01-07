@@ -75,8 +75,9 @@ builder.Services.AddDbContext<ConcertDbContext>(options =>
 builder.Services.AddDbContext<ConcertAuthDbContext>(options =>
     options.UseSqlServer(connectionStringAuth));
 
-// Dependency injection for additional services
+// Dependency injection for additional services.
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+builder.Services.AddScoped<IAuthRepository, AuthRepository>();
 
 // Add Automapper.
 builder.Services.AddAutoMapper(typeof(AutoMapperProfiles));

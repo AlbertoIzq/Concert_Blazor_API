@@ -35,7 +35,8 @@ namespace Concert.DataAccess.API.Repositories
                 jwtIssuer,
                 jwtAudience,
                 claims,
-                expires: DateTime.Now.AddMinutes(BackConstants.JWT_TOKEN_EXPIRATION_MINUTES));
+                expires: DateTime.Now.AddMinutes(BackConstants.JWT_TOKEN_EXPIRATION_MINUTES),
+                signingCredentials: credentials);
 
             return new JwtSecurityTokenHandler().WriteToken(token);
         }
