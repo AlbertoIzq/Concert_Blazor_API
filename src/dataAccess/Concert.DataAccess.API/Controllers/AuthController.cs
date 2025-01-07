@@ -22,7 +22,7 @@ namespace Concert.DataAccess.API.Controllers
         }
 
         /// <summary>
-        /// POST: Register
+        /// POST: api/auth/Register
         /// </summary>
         /// <param name="registerRequestDto"></param>
         /// <returns></returns>
@@ -56,6 +56,44 @@ namespace Concert.DataAccess.API.Controllers
 
             var problemDetails = GetRegisterErrors(identityResult);
 
+            LoggerHelper<AuthController>.LogResultEndpoint(_logger, HttpContext, "Bad Request", problemDetails);
+            return BadRequest(problemDetails);
+        }
+
+        /// <summary>
+        /// POST:api/auth/Login
+        /// </summary>
+        /// <param name="loginRequestDto"></param>
+        /// <returns></returns>
+        [HttpPost]
+        [Route("Login")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> Login(LoginRequestDto loginRequestDto)
+        {
+            LoggerHelper<AuthController>.LogCalledEndpoint(_logger, HttpContext);
+
+            var identityUser = await _userManager.FindByEmailAsync(loginRequestDto.Username);
+
+            if (identityUser is not null)
+            {
+                var checkPasswordResult = await _userManager.CheckPasswordAsync(identityUser, loginRequestDto.Password);
+
+                if (checkPasswordResult)
+                {
+                    // Create Token
+                    /// @todo
+                    LoggerHelper<AuthController>.LogResultEndpoint(_logger, HttpContext, "Ok", "Ok");
+                    return Ok();
+                }
+            }
+
+            var problemDetails = new ProblemDetails()
+            {
+                Status = StatusCodes.Status400BadRequest,
+                Title = "Bad credentials",
+                Detail = "Username or password are incorrect."
+            };
             LoggerHelper<AuthController>.LogResultEndpoint(_logger, HttpContext, "Bad Request", problemDetails);
             return BadRequest(problemDetails);
         }
