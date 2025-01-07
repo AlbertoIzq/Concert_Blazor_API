@@ -6,6 +6,7 @@ using Concert.DataAccess.API.Repositories;
 using Concert.DataAccess.Interfaces;
 using DotEnv.Core;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Scalar.AspNetCore;
@@ -80,7 +81,24 @@ builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 // Add Automapper.
 builder.Services.AddAutoMapper(typeof(AutoMapperProfiles));
 
-// Add JWT Authentication
+// Add Identity.
+builder.Services.AddIdentityCore<IdentityUser>()
+    .AddRoles<IdentityRole>()
+    .AddTokenProvider<DataProtectorTokenProvider<IdentityUser>>("Concert")
+    .AddEntityFrameworkStores<ConcertAuthDbContext>()
+    .AddDefaultTokenProviders(); // Used to generate tokens to reset passwords, change emails, etc.
+// Configure password settings.
+builder.Services.Configure<IdentityOptions>(options =>
+{
+    options.Password.RequireDigit = true;
+    options.Password.RequireLowercase = true;
+    options.Password.RequireUppercase = true;
+    options.Password.RequireNonAlphanumeric = true;
+    options.Password.RequiredLength = 10;
+    options.Password.RequiredUniqueChars = 1;
+});
+
+// Add JWT Authentication.
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     options.TokenValidationParameters = new TokenValidationParameters

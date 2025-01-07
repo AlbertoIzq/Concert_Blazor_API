@@ -25,6 +25,7 @@ _TECHNOLOGIES USED_
     - DotEnv.Core: Manage env. files
 	- Automapper: Object-to-object mapping library
 	- Serilog: Simple .NET logging with fully-structured events
+	- AspNetCore.Identity: Manage authentication and authorization
 
 _CONCEPTS USED_
 
@@ -40,6 +41,7 @@ _CONCEPTS USED_
   - Environment variables
   - DTO (Domain Transfer Object)
   - Asynchronous programming
+  - Authentication and authorization
 
 - FRONTEND
   - REST API (Representational State Transfer)
