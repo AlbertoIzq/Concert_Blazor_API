@@ -12,5 +12,7 @@
         public const string READER_ROLE_NAME = "Reader";
         public const string WRITER_ROLE_NAME = "Writer";
         public const string ADMIN_ROLE_NAME = "Admin";
+
+        public const int JWT_TOKEN_EXPIRATION_MINUTES = 15;
     }
 }
