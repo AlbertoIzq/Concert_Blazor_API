@@ -76,6 +76,7 @@ _TODO_
     - RestoreAsync: In response distinguish between Not existing entity and Entity already restored scenarios
 	- Add RemoveRange method
   - Implement refresh token as well
+  - Implement GetAll method only for Admin to retrieve also soft deleted items
  
 _BUGS_
 
