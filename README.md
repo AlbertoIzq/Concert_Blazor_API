@@ -57,6 +57,7 @@ _CONCEPTS USED_
     - Global exception handing
     - Id route parameter validation
     - Model validation
+  - Action filters
   - Logging into a file:
     - Exceptions
 	- API requests

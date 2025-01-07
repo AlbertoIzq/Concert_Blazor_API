@@ -24,6 +24,11 @@ namespace Concert.DataAccess.API.Controllers
             _logger = logger;
         }
 
+        /// <summary>
+        /// POST: api/songrequests
+        /// </summary>
+        /// <param name="addSongRequestDto"></param>
+        /// <returns></returns>
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [HttpPost]
