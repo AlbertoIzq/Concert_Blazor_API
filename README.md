@@ -80,6 +80,7 @@ _TODO_
 	- Add RemoveRange method
   - Implement refresh token as well
   - Implement GetAll method only for Admin to retrieve also soft deleted items
+  - Split Delete endpoint into Delete and HardDelete to be able to allow only Admin to use HardDelete
  
 _BUGS_
 
