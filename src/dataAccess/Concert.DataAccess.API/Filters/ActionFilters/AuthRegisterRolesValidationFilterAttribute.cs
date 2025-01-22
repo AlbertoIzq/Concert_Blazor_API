@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.Mvc.Filters;
 namespace Concert.DataAccess.API.Filters.ActionFilters
 {
     /// <summary>
-    /// Used to check
+    /// Used to handle problems when registering a user with roles
     /// </summary>
     public class AuthRegisterRolesValidationFilterAttribute : ActionFilterAttribute
     {

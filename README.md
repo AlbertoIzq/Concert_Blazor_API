@@ -26,7 +26,8 @@ _TECHNOLOGIES USED_
 	- Automapper: Object-to-object mapping library
 	- Serilog: Simple .NET logging with fully-structured events
 	- AspNetCore.Identity: Manage authentication and authorization
-
+	- JWT: Manage JsonWebToken
+	
 _CONCEPTS USED_
 
 - GENERAL
@@ -42,6 +43,7 @@ _CONCEPTS USED_
   - DTO (Domain Transfer Object)
   - Asynchronous programming
   - Authentication and authorization
+  - Json Web Token (JWT)
 
 - FRONTEND
   - REST API (Representational State Transfer)

@@ -1,12 +1,14 @@
 using Concert.Business.Constants;
 using Concert.Business.Mappings;
 using Concert.DataAccess.API.Data;
+using Concert.DataAccess.API.Helpers;
 using Concert.DataAccess.API.Middlewares;
 using Concert.DataAccess.API.Repositories;
 using Concert.DataAccess.Interfaces;
 using DotEnv.Core;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Scalar.AspNetCore;
@@ -102,15 +104,65 @@ builder.Services.Configure<IdentityOptions>(options =>
 // Add JWT Authentication.
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
-    options.TokenValidationParameters = new TokenValidationParameters
     {
-        ValidateIssuer = true,
-        ValidateAudience = true,
-        ValidateLifetime = true,
-        ValidateIssuerSigningKey = true,
-        ValidIssuer = jwtIssuer,
-        ValidAudiences = new[] { jwtAudience },
-        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSecretKey))
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+            ValidIssuer = jwtIssuer,
+            ValidAudiences = new[] { jwtAudience },
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSecretKey))
+        };
+        options.Events = new JwtBearerEvents
+        {
+            OnChallenge = async context =>
+            {
+                // Suppress the default challenge behavior so there's not an exception
+                // because the response has already started
+                context.HandleResponse();
+
+                // Log Unauthorized request details
+                var logger = context.HttpContext.RequestServices.GetRequiredService<ILogger<Program>>();
+                LoggerHelper<Program>.LogUnauthorizedRequest(logger, context.HttpContext);
+
+                // Customize response
+                var problemDetails = new ProblemDetails()
+                {
+                    Status = StatusCodes.Status401Unauthorized,
+                    Title = "You are not authorized to access this resource.",
+                };
+
+                if (context.Error is not null && context.ErrorDescription is not null)
+                {
+                    problemDetails.Detail = $"Error: {context.Error}, ErrorDescription: {context.ErrorDescription}";
+                }
+
+                context.Response.ContentType = "application/json";
+                context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+
+                await context.Response.WriteAsJsonAsync(problemDetails);
+            },
+            OnForbidden = async context =>
+            {
+                // Log Forbidden request details
+                var logger = context.HttpContext.RequestServices.GetRequiredService<ILogger<Program>>();
+                LoggerHelper<Program>.LogForbiddenRequest(logger, context.HttpContext);
+
+                // Customize response
+                var problemDetails = new ProblemDetails()
+                {
+                    Status = StatusCodes.Status403Forbidden,
+                    Title = "You do not have permission to access this resource."
+                };
+
+                context.Response.ContentType = "application/json";
+                context.Response.StatusCode = StatusCodes.Status403Forbidden;
+
+                await context.Response.WriteAsJsonAsync(problemDetails);
+            }
+        };
     });
 
 // Add Serilog.
@@ -145,15 +197,15 @@ if (app.Environment.IsDevelopment())
     });
 }
 
-// Middlewares
-app.UseMiddleware<ExceptionHandlerMiddleware>();
-app.UseMiddleware<RouteIdValidationMiddleware>();
-app.UseMiddleware<ModelValidationMiddleware>();
-
 app.UseHttpsRedirection();
 
 app.UseAuthentication();
 app.UseAuthorization();
+
+// Middlewares
+app.UseMiddleware<ExceptionHandlerMiddleware>();
+app.UseMiddleware<RouteIdValidationMiddleware>();
+app.UseMiddleware<ModelValidationMiddleware>();
 
 app.MapControllers();
 

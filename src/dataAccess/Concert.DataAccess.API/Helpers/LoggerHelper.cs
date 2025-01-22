@@ -30,5 +30,18 @@
                 "RequestMethod: {@httpContext.Request.Method}, RequestPath: {@httpContext.Request.Path}",
                 ex.Message, ex, httpContext.Request.Method, httpContext.Request.Path);
         }
+
+        public static void LogUnauthorizedRequest(ILogger<T> logger, HttpContext httpContext)
+        {
+            logger.LogInformation("Unathorized request. Method: {Method}, Path: {Path}, IP: {IP}",
+                httpContext.Request.Method, httpContext.Request.Path, httpContext.Connection.RemoteIpAddress);
+        }
+
+        public static void LogForbiddenRequest(ILogger<T> logger, HttpContext httpContext)
+        {
+            var user = httpContext.User.Identity?.Name ?? "Anonymous";
+            logger.LogInformation("Forbidden request. User: {User}, Method: {Method}, Path: {Path}, IP: {IP}",
+                user, httpContext.Request.Method, httpContext.Request.Path, httpContext.Connection.RemoteIpAddress);
+        }
     }
 }
