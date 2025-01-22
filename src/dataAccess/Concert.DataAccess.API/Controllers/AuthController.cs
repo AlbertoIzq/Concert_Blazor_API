@@ -92,7 +92,7 @@ namespace Concert.DataAccess.API.Controllers
                         var jwtToken = _authRepository.CreateJWTToken(identityUser, roles.ToList());
                         var response = new LoginResponseDto
                         {
-                            JwtToken = jwtToken
+                            AccessToken = jwtToken
                         };
 
                         LoggerHelper<AuthController>.LogResultEndpoint(_logger, HttpContext, "Ok", response);

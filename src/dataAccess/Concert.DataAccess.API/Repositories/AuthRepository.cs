@@ -1,4 +1,5 @@
 ﻿using Concert.Business.Constants;
+using Concert.Business.Models;
 using Concert.DataAccess.Interfaces;
 using DotEnv.Core;
 using Microsoft.AspNetCore.Identity;
@@ -11,7 +12,7 @@ namespace Concert.DataAccess.API.Repositories
 {
     public class AuthRepository : IAuthRepository
     {
-        public string CreateJWTToken(IdentityUser identityUser, List<string> roles)
+        public Token CreateJWTToken(IdentityUser identityUser, List<string> roles)
         {
             // Create claims
             var claims = new List<Claim>();
@@ -31,14 +32,21 @@ namespace Concert.DataAccess.API.Repositories
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSecretKey));
             var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
+            var expiresAtDate = DateTime.Now.AddMinutes(BackConstants.JWT_TOKEN_EXPIRATION_MINUTES);
             var token = new JwtSecurityToken(
                 jwtIssuer,
                 jwtAudience,
                 claims,
-                expires: DateTime.Now.AddMinutes(BackConstants.JWT_TOKEN_EXPIRATION_MINUTES),
+                expires: expiresAtDate,
                 signingCredentials: credentials);
 
-            return new JwtSecurityTokenHandler().WriteToken(token);
+            var tokenValue = new JwtSecurityTokenHandler().WriteToken(token);
+
+            return new Token()
+            {
+                Value = tokenValue,
+                ExpiresAt = expiresAtDate
+            };
         }
     }
 }

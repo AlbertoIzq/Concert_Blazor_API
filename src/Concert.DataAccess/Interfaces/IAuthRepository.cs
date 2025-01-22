@@ -1,9 +1,10 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using Concert.Business.Models;
+using Microsoft.AspNetCore.Identity;
 
 namespace Concert.DataAccess.Interfaces
 {
     public interface IAuthRepository
     {
-        public string CreateJWTToken(IdentityUser identityUser, List<string> roles);
+        public Token CreateJWTToken(IdentityUser identityUser, List<string> roles);
     }
 }
