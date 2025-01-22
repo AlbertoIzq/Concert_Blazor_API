@@ -43,7 +43,7 @@ _CONCEPTS USED_
   - DTO (Domain Transfer Object)
   - Asynchronous programming
   - Authentication and authorization
-  - Json Web Token (JWT)
+  - Json Web Token (JWT) for access token
 
 - FRONTEND
   - REST API (Representational State Transfer)

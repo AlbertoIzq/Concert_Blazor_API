@@ -88,11 +88,13 @@ namespace Concert.DataAccess.API.Controllers
 
                     if (roles is not null)
                     {
-                        // Create JWT Token
-                        var jwtToken = _authRepository.CreateJWTToken(identityUser, roles.ToList());
+                        // Create tokens
+                        var accessToken = _authRepository.CreateAccessToken(identityUser, roles.ToList());
+                        var refreshToken = _authRepository.CreateRefreshToken();
                         var response = new LoginResponseDto
                         {
-                            AccessToken = jwtToken
+                            AccessToken = accessToken,
+                            RefreshToken = refreshToken
                         };
 
                         LoggerHelper<AuthController>.LogResultEndpoint(_logger, HttpContext, "Ok", response);

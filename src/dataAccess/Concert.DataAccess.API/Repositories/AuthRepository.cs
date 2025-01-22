@@ -6,13 +6,14 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using System.Security.Cryptography;
 using System.Text;
 
 namespace Concert.DataAccess.API.Repositories
 {
     public class AuthRepository : IAuthRepository
     {
-        public Token CreateJWTToken(IdentityUser identityUser, List<string> roles)
+        public Token CreateAccessToken(IdentityUser identityUser, List<string> roles)
         {
             // Create claims
             var claims = new List<Claim>();
@@ -32,7 +33,7 @@ namespace Concert.DataAccess.API.Repositories
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSecretKey));
             var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
-            var expiresAtDate = DateTime.Now.AddMinutes(BackConstants.JWT_TOKEN_EXPIRATION_MINUTES);
+            var expiresAtDate = DateTime.Now.AddMinutes(BackConstants.ACCESS_TOKEN_EXPIRATION_MINUTES);
             var token = new JwtSecurityToken(
                 jwtIssuer,
                 jwtAudience,
@@ -46,6 +47,23 @@ namespace Concert.DataAccess.API.Repositories
             {
                 Value = tokenValue,
                 ExpiresAt = expiresAtDate
+            };
+        }
+
+        public Token CreateRefreshToken()
+        {
+            var randomNumber = new byte[32];
+            using (var rng = RandomNumberGenerator.Create())
+            {
+                rng.GetBytes(randomNumber);
+            }
+            var expiresAtDate = DateTime.Now.AddHours(BackConstants.REFRESH_TOKEN_EXPIRATION_HOURS);
+            var tokenValue = Convert.ToBase64String(randomNumber);
+
+            return new Token()
+            {
+                Value = tokenValue,
+                ExpiresAt = expiresAtDate,
             };
         }
     }
