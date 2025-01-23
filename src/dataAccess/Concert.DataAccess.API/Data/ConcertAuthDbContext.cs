@@ -1,4 +1,5 @@
 ﻿using Concert.Business.Constants;
+using Concert.Business.Models.Domain;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
@@ -11,6 +12,9 @@ namespace Concert.DataAccess.API.Data
         {
 
         }
+
+        public DbSet<RefreshToken> RefreshTokens { get; set; }
+
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -42,6 +46,15 @@ namespace Concert.DataAccess.API.Data
             };
 
             modelBuilder.Entity<IdentityRole>().HasData(roles);
+
+            // Configure the RefreshToken entity
+            modelBuilder.Entity<RefreshToken>(entity =>
+            {
+                entity.HasKey(e => e.Id); // Define primary key
+                entity.Property(e => e.UserName).IsRequired();
+                entity.Property(e => e.Value).IsRequired();
+                entity.Property(e => e.ExpiryDate).IsRequired();
+            });
         }
     }
 }

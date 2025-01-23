@@ -42,7 +42,7 @@ _CONCEPTS USED_
   - Environment variables
   - DTO (Domain Transfer Object)
   - Asynchronous programming
-  - Authentication and authorization
+  - Authentication and authorization, refresh token-based
   - Json Web Token (JWT) for access token
 
 - FRONTEND
