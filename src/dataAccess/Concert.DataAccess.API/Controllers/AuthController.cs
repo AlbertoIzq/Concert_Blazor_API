@@ -1,7 +1,10 @@
+using Concert.Business.Constants;
+using Concert.Business.Models;
 using Concert.Business.Models.Domain;
 using Concert.DataAccess.API.Filters.ActionFilters;
 using Concert.DataAccess.API.Helpers;
 using Concert.DataAccess.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using System.Data;
@@ -94,7 +97,24 @@ namespace Concert.DataAccess.API.Controllers
                         var claims = CreateClaimsForTokenGeneration(loginRequestDto.Username, (List<string>)roles);
                         var response = await CreateTokens(claims);
 
-                        LoggerHelper<AuthController>.LogResultEndpoint(_logger, HttpContext, "Ok", response);
+                        var responseForLogging = new LoginRefreshResponseDto()
+                        {
+                            AccessToken = new Token()
+                            {
+                                Value = "..." +
+                                    response.AccessToken.Value.Substring(response.AccessToken.Value.Length - BackConstants.TOKEN_LAST_NUM_CHARS_LOGGING),
+                                ExpiresAt = response.AccessToken.ExpiresAt
+                            },
+                            RefreshToken = new Token()
+                            {
+                                Value = "..." +
+                                    response.RefreshToken.Value.Substring(response.RefreshToken.Value.Length - BackConstants.TOKEN_LAST_NUM_CHARS_LOGGING),
+                                ExpiresAt = response.RefreshToken.ExpiresAt
+                            }
+                        };
+                        
+                        LoggerHelper<AuthController>.LogResultEndpoint(_logger, HttpContext, "Ok", responseForLogging);
+                        
                         return Ok(response);
                     }
                 }
@@ -170,7 +190,23 @@ namespace Concert.DataAccess.API.Controllers
 
             var response = await CreateTokens(claims);
 
-            LoggerHelper<AuthController>.LogResultEndpoint(_logger, HttpContext, "Ok", response);
+            var responseForLogging = new LoginRefreshResponseDto()
+            {
+                AccessToken = new Token()
+                {
+                    Value = "..." +
+                                    response.AccessToken.Value.Substring(response.AccessToken.Value.Length - BackConstants.TOKEN_LAST_NUM_CHARS_LOGGING),
+                    ExpiresAt = response.AccessToken.ExpiresAt
+                },
+                RefreshToken = new Token()
+                {
+                    Value = "..." +
+                                    response.RefreshToken.Value.Substring(response.RefreshToken.Value.Length - BackConstants.TOKEN_LAST_NUM_CHARS_LOGGING),
+                    ExpiresAt = response.RefreshToken.ExpiresAt
+                }
+            };
+
+            LoggerHelper<AuthController>.LogResultEndpoint(_logger, HttpContext, "Ok", responseForLogging);
             return Ok(response);      
         }
 

@@ -14,6 +14,7 @@
         public const string ADMIN_ROLE_NAME = "Admin";
 
         public const int ACCESS_TOKEN_EXPIRATION_MINUTES = 15;
-        public const int REFRESH_TOKEN_EXPIRATION_HOURS = 24; 
+        public const int REFRESH_TOKEN_EXPIRATION_HOURS = 24;
+        public const int TOKEN_LAST_NUM_CHARS_LOGGING = 5;
     }
 }
