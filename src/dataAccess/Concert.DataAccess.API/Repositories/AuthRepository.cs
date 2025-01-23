@@ -13,16 +13,8 @@ namespace Concert.DataAccess.API.Repositories
 {
     public class AuthRepository : IAuthRepository
     {
-        public Token CreateAccessToken(IdentityUser identityUser, List<string> roles)
+        public Token CreateAccessToken(List<Claim> claims)
         {
-            // Create claims
-            var claims = new List<Claim>();
-            claims.Add(new Claim(ClaimTypes.Email, identityUser.Email));
-            foreach (var role in roles)
-            {
-                claims.Add(new Claim(ClaimTypes.Role, role));
-            }
-
             // Read environment variables.
             new EnvLoader().Load();
             var envVarReader = new EnvReader();
@@ -65,6 +57,41 @@ namespace Concert.DataAccess.API.Repositories
                 Value = tokenValue,
                 ExpiresAt = expiresAtDate,
             };
+        }
+
+        public ClaimsPrincipal GetClaimsPrincipalFromExpiredAccessToken(string token)
+        {
+            // Read environment variables.
+            new EnvLoader().Load();
+            var envVarReader = new EnvReader();
+            string jwtSecretKey = envVarReader["Jwt_SecretKey"];
+            string jwtIssuer = envVarReader["Jwt_Issuer"];
+            string jwtAudience = envVarReader["Jwt_Audience"];
+
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSecretKey));
+
+            var tokenValidationParameters = new TokenValidationParameters
+            {
+                ValidateAudience = true,
+                ValidateIssuer = true,
+                ValidateIssuerSigningKey = true,
+                IssuerSigningKey = key,
+                ValidIssuer = jwtIssuer,
+                ValidAudiences = new[] { jwtAudience },
+                ValidateLifetime = false // Token expiration date isn't important
+            };
+
+            var tokenHandler = new JwtSecurityTokenHandler();
+            SecurityToken securityToken;
+            var principal = tokenHandler.ValidateToken(token, tokenValidationParameters, out securityToken);
+            
+            var jwtSecurityToken = securityToken as JwtSecurityToken;
+            if (jwtSecurityToken == null || !jwtSecurityToken.Header.Alg.Equals(SecurityAlgorithms.HmacSha256, StringComparison.InvariantCultureIgnoreCase))
+            {
+                throw new SecurityTokenException("Invalid token");
+            }
+
+            return principal;
         }
     }
 }

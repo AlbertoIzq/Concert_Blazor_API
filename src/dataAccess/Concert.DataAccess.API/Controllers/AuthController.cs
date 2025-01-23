@@ -4,6 +4,8 @@ using Concert.DataAccess.API.Helpers;
 using Concert.DataAccess.Interfaces;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using System.Data;
+using System.Security.Claims;
 
 namespace Concert.DataAccess.API.Controllers
 {
@@ -13,13 +15,15 @@ namespace Concert.DataAccess.API.Controllers
     {
         private readonly UserManager<IdentityUser> _userManager;
         private readonly IAuthRepository _authRepository;
+        private readonly IRefreshTokenRepository _refreshTokenRepository;
         private readonly ILogger<AuthController> _logger;
 
         public AuthController(UserManager<IdentityUser> userManager, IAuthRepository authRepository,
-            ILogger<AuthController> logger)
+            IRefreshTokenRepository refreshTokenRepository, ILogger<AuthController> logger)
         {
             _userManager = userManager;
             _authRepository = authRepository;
+            _refreshTokenRepository = refreshTokenRepository;
             _logger = logger;
         }
 
@@ -83,19 +87,12 @@ namespace Concert.DataAccess.API.Controllers
 
                 if (checkPasswordResult)
                 {
-                    // Get roles for this user
                     var roles = await _userManager.GetRolesAsync(identityUser);
 
                     if (roles is not null)
                     {
-                        // Create tokens
-                        var accessToken = _authRepository.CreateAccessToken(identityUser, roles.ToList());
-                        var refreshToken = _authRepository.CreateRefreshToken();
-                        var response = new LoginResponseDto
-                        {
-                            AccessToken = accessToken,
-                            RefreshToken = refreshToken
-                        };
+                        var claims = CreateClaimsForTokenGeneration(loginRequestDto.Username, (List<string>)roles);
+                        var response = await CreateTokens(claims);
 
                         LoggerHelper<AuthController>.LogResultEndpoint(_logger, HttpContext, "Ok", response);
                         return Ok(response);
@@ -111,6 +108,70 @@ namespace Concert.DataAccess.API.Controllers
             };
             LoggerHelper<AuthController>.LogResultEndpoint(_logger, HttpContext, "Bad Request", problemDetails);
             return BadRequest(problemDetails);
+        }
+
+        /// <summary>
+        /// POST:api/auth/Refresh
+        /// </summary>
+        /// <param name="loginRequestDto"></param>
+        /// <returns></returns>
+        [HttpPost]
+        [Route("Refresh")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> Refresh(RefreshRequestDto refreshRequestDto)
+        {
+            LoggerHelper<AuthController>.LogCalledEndpoint(_logger, HttpContext);
+
+            string accessToken = refreshRequestDto.AccessToken;
+            string refreshToken = refreshRequestDto.RefreshToken;
+
+            var claimsPrincipal = _authRepository.GetClaimsPrincipalFromExpiredAccessToken(accessToken);
+            var username = claimsPrincipal.FindFirst(ClaimTypes.Email)?.Value;
+
+            var refreshTokenDb = await _refreshTokenRepository.GetByUserNameAsync(username);
+            var badRequestDetail = string.Empty;
+
+            // Check if refresh token is correct
+            if (refreshTokenDb is null)
+            {
+                badRequestDetail = "User has no refresh token.";
+            }
+            else if (refreshTokenDb.Value != refreshRequestDto.RefreshToken)
+            {
+                badRequestDetail = "Refresh token is invalid.";
+            }
+            else if (refreshTokenDb.ExpiryDate <= DateTime.Now)
+            {
+                badRequestDetail = "Refresh token is expired.";
+            }
+
+            if (!string.IsNullOrEmpty(badRequestDetail))
+            {
+                var problemDetails = new ProblemDetails()
+                {
+                    Status = StatusCodes.Status400BadRequest,
+                    Title = "Invalid client request",
+                    Detail = badRequestDetail
+                };
+                LoggerHelper<AuthController>.LogResultEndpoint(_logger, HttpContext, "Bad Request", problemDetails);
+                return BadRequest(problemDetails);
+            }
+
+            // Extract claims from access token
+            var claims = new List<Claim>();
+            foreach (var claim in claimsPrincipal.Claims)
+            {
+                if (claim.Type == ClaimTypes.Email || claim.Type == ClaimTypes.Role)
+                {
+                    claims.Add(claim);
+                }
+            }
+
+            var response = await CreateTokens(claims);
+
+            LoggerHelper<AuthController>.LogResultEndpoint(_logger, HttpContext, "Ok", response);
+            return Ok(response);      
         }
 
         /// <summary>
@@ -151,6 +212,65 @@ namespace Concert.DataAccess.API.Controllers
             problemDetails.Detail = "Something went wrong.";
 
             return problemDetails;
+        }
+
+        /// <summary>
+        /// Create access token and refresh token
+        /// </summary>
+        /// <param name="claims"></param>
+        /// <returns></returns>
+        private async Task<LoginRefreshResponseDto> CreateTokens(List<Claim> claims)
+        {
+            var userName = claims.FirstOrDefault(x => x.Type == ClaimTypes.Email).Value;
+
+            // Create tokens
+            var accessToken = _authRepository.CreateAccessToken(claims);
+            var refreshToken = _authRepository.CreateRefreshToken();
+
+            // Manage refresh token
+            var refreshTokenEntity = new RefreshToken()
+            {
+                Value = refreshToken.Value,
+                ExpiryDate = refreshToken.ExpiresAt,
+                UserName = userName
+            };
+
+            var refreshTokenDb = await _refreshTokenRepository.GetByUserNameAsync(userName);
+
+            if (refreshTokenDb is null)
+            {
+                await _refreshTokenRepository.CreateAsync(refreshTokenEntity);
+            }
+            else
+            {
+                await _refreshTokenRepository.UpdateAsync(refreshTokenDb.Id, refreshTokenEntity);
+            }
+
+            return new LoginRefreshResponseDto()
+            {
+                AccessToken = accessToken,
+                RefreshToken = refreshToken
+            };
+        }
+
+        /// <summary>
+        /// Create Email claim and Roles claims for access token generation
+        /// </summary>
+        /// <param name="userEmail"></param>
+        /// <param name="roles"></param>
+        /// <returns></returns>
+        private List<Claim> CreateClaimsForTokenGeneration(string userEmail, List<string> roles)
+        {
+            var claims = new List<Claim>();
+
+            claims.Add(new Claim(ClaimTypes.Email, userEmail));
+
+            foreach (var role in roles)
+            {
+                claims.Add(new Claim(ClaimTypes.Role, role));
+            }
+
+            return claims;
         }
     }
 }
