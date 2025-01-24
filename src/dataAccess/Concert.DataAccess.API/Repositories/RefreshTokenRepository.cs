@@ -26,6 +26,11 @@ namespace Concert.DataAccess.API.Repositories
             return await _concertAuthDbContext.RefreshTokens.FirstOrDefaultAsync(x => x.UserName == userName);
         }
 
+        public async Task<RefreshToken?> GetByTokenValueAsync(string tokenValue)
+        {
+            return await _concertAuthDbContext.RefreshTokens.FirstOrDefaultAsync(x => x.Value == tokenValue);
+        }
+
         public async Task<RefreshToken?> UpdateAsync(int id, RefreshToken refreshToken)
         {
             // Check if it exists

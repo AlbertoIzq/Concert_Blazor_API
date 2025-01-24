@@ -210,6 +210,37 @@ namespace Concert.DataAccess.API.Controllers
             return Ok(response);      
         }
 
+        [HttpPost]
+        [Route("Revoke")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [Authorize(Roles = BackConstants.ADMIN_ROLE_NAME)]
+        public async Task<IActionResult> Revoke(RevokeRequestDto revokeRequestDto)
+        {
+            LoggerHelper<AuthController>.LogCalledEndpoint(_logger, HttpContext);
+
+            var refreshTokenToBeDeleted = await _refreshTokenRepository.GetByTokenValueAsync(revokeRequestDto.RefreshToken);
+
+            if (refreshTokenToBeDeleted == null)
+            {
+                var problemDetails = new ProblemDetails()
+                {
+                    Status = StatusCodes.Status404NotFound,
+                    Title = "Item not found.",
+                    Detail = "The refresh token couldn't be found."
+                };
+
+                LoggerHelper<AuthController>.LogResultEndpoint(_logger, HttpContext, "Not Found", problemDetails);
+                return NotFound(problemDetails);
+            }
+            
+            var refreshTokenDeleted = await _refreshTokenRepository.DeleteAsync(refreshTokenToBeDeleted.Id);
+            LoggerHelper<AuthController>.LogResultEndpoint(_logger, HttpContext, "No Content");
+
+            // Return No content back to client
+            return NoContent();
+        }
+
         /// <summary>
         /// Get a list of obtained errors when trying to register the user
         /// </summary>

@@ -6,6 +6,7 @@ namespace Concert.DataAccess.Interfaces
     {
         Task<RefreshToken> CreateAsync(RefreshToken refreshToken);
         Task<RefreshToken?> GetByUserNameAsync(string userName);
+        Task<RefreshToken?> GetByTokenValueAsync(string tokenValue);
         Task<RefreshToken?> UpdateAsync(int id, RefreshToken refreshToken);
         Task<RefreshToken?> DeleteAsync(int id);
     }
