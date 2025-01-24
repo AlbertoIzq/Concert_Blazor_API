@@ -39,6 +39,8 @@ _CONCEPTS USED_
 	- UIWasm: Blazor WebAssembly standalone project
 	- Business: Class library project with business logic
 	- Shared: Class library project with shared functionality
+  - REST API (Representational State Transfer)
+  - Design patterns: Repository, Unit of work, Dependency injection
   - Environment variables
   - DTO (Domain Transfer Object)
   - Asynchronous programming
@@ -46,8 +48,6 @@ _CONCEPTS USED_
   - Json Web Token (JWT) for access token
 
 - FRONTEND
-  - REST API (Representational State Transfer)
-  - Design patterns: Repository, Unit of work, Dependency injection
   - Exception handling in API calls
   - Logging Exceptions into BrowserConsole
   - Toast notifications
@@ -64,6 +64,7 @@ _CONCEPTS USED_
     - Exceptions
 	- API requests
 	- API responses
+  - Advanced Encryption Standard (AES) to store refresh token value in database
 
 _TODO_
 
