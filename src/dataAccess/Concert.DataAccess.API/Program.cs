@@ -26,7 +26,7 @@ string envName = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
 new EnvLoader().Load();
 var envVarReader = new EnvReader();
 
-// Get connection strings
+// Get connection strings.
 string connectionString = string.Empty;
 string connectionStringAuth = string.Empty;
 
@@ -41,16 +41,19 @@ else if (envName == Environments.Production)
     connectionStringAuth = Environment.GetEnvironmentVariable("DataBaseAuth_ConnectionString");
 }
 
-// Get JWT parameters
+// Get JWT parameters.
 string jwtSecretKey = envVarReader["Jwt_SecretKey"];
 string jwtIssuer = envVarReader["Jwt_Issuer"];
 string jwtAudience = envVarReader["Jwt_Audience"];
+
+// Get encryption parameter.
+string encryptionSecretKey = envVarReader["Encryption_SecretKey"];
 
 // Add services to the container.
 
 builder.Services.AddControllers();
 
-// Configure Cors (Cross-origin resource sharing) to allow API requests from the frontend
+// Configure Cors (Cross-origin resource sharing) to allow API requests from the frontend.
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAll", builder =>
@@ -81,6 +84,8 @@ builder.Services.AddDbContext<ConcertAuthDbContext>(options =>
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped<IAuthRepository, AuthRepository>();
 builder.Services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
+builder.Services.AddSingleton<IEncryptionService>(provider =>
+    new AesEncryptionService(encryptionSecretKey));
 
 // Add Automapper.
 builder.Services.AddAutoMapper(typeof(AutoMapperProfiles));
@@ -121,14 +126,14 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             OnChallenge = async context =>
             {
                 // Suppress the default challenge behavior so there's not an exception
-                // because the response has already started
+                // because the response has already started.
                 context.HandleResponse();
 
-                // Log Unauthorized request details
+                // Log Unauthorized request details.
                 var logger = context.HttpContext.RequestServices.GetRequiredService<ILogger<Program>>();
                 LoggerHelper<Program>.LogUnauthorizedRequest(logger, context.HttpContext);
 
-                // Customize response
+                // Customize response.
                 var problemDetails = new ProblemDetails()
                 {
                     Status = StatusCodes.Status401Unauthorized,
@@ -147,11 +152,11 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             },
             OnForbidden = async context =>
             {
-                // Log Forbidden request details
+                // Log Forbidden request details.
                 var logger = context.HttpContext.RequestServices.GetRequiredService<ILogger<Program>>();
                 LoggerHelper<Program>.LogForbiddenRequest(logger, context.HttpContext);
 
-                // Customize response
+                // Customize response.
                 var problemDetails = new ProblemDetails()
                 {
                     Status = StatusCodes.Status403Forbidden,
@@ -173,9 +178,9 @@ var logger = new LoggerConfiguration()
         rollingInterval: RollingInterval.Day,
         retainedFileCountLimit: BackConstants.API_LOGS_MAX_NUM_FILES)
     .MinimumLevel.Information()
-    // To avoid logging irrelevant information from Microsoft
+    // To avoid logging irrelevant information from Microsoft.
     .MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
-    // To log as information from Microsoft only lifetime events
+    // To log as information from Microsoft only lifetime events.
     .MinimumLevel.Override("Microsoft.Hosting.Lifetime", LogEventLevel.Information)
     .CreateLogger();
 builder.Logging.ClearProviders();
@@ -183,7 +188,7 @@ builder.Logging.AddSerilog(logger);
 
 var app = builder.Build();
 
-// Use the CORS policy
+// Use the CORS policy.
 app.UseCors("AllowBlazorApp");
 
 // Configure the HTTP request pipeline.
@@ -203,7 +208,7 @@ app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
 
-// Middlewares
+// Middlewares.
 app.UseMiddleware<ExceptionHandlerMiddleware>();
 app.UseMiddleware<RouteIdValidationMiddleware>();
 app.UseMiddleware<ModelValidationMiddleware>();

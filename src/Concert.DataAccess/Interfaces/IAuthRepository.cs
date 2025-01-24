@@ -11,18 +11,18 @@ namespace Concert.DataAccess.Interfaces
         /// </summary>
         /// <param name="claims"></param>
         /// <returns></returns>
-        public Token CreateAccessToken(List<Claim> claims);
+        Token CreateAccessToken(List<Claim> claims);
         /// <summary>
         /// Creates a cryptographic random number for refresh token
         /// </summary>
         /// <returns></returns>
-        public Token CreateRefreshToken();
+        Token CreateRefreshToken();
 
         /// <summary>
         /// Gets ClaimsPrincipal from access token
         /// </summary>
         /// <param name="token"></param>
         /// <returns></returns>
-        public ClaimsPrincipal GetClaimsPrincipalFromExpiredAccessToken(string token);
+        ClaimsPrincipal GetClaimsPrincipalFromExpiredAccessToken(string token);
     }
 }

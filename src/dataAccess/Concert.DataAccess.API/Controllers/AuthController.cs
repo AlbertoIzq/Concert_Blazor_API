@@ -19,14 +19,17 @@ namespace Concert.DataAccess.API.Controllers
         private readonly UserManager<IdentityUser> _userManager;
         private readonly IAuthRepository _authRepository;
         private readonly IRefreshTokenRepository _refreshTokenRepository;
+        private readonly IEncryptionService _encryptionService;
         private readonly ILogger<AuthController> _logger;
 
         public AuthController(UserManager<IdentityUser> userManager, IAuthRepository authRepository,
-            IRefreshTokenRepository refreshTokenRepository, ILogger<AuthController> logger)
+            IRefreshTokenRepository refreshTokenRepository, IEncryptionService encryptionService,
+            ILogger<AuthController> logger)
         {
             _userManager = userManager;
             _authRepository = authRepository;
             _refreshTokenRepository = refreshTokenRepository;
+            _encryptionService = encryptionService;
             _logger = logger;
         }
 
@@ -150,6 +153,7 @@ namespace Concert.DataAccess.API.Controllers
             var username = claimsPrincipal.FindFirst(ClaimTypes.Email)?.Value;
 
             var refreshTokenDb = await _refreshTokenRepository.GetByUserNameAsync(username);
+            var refreshTokenDbDecryptedValue = _encryptionService.Decrypt(refreshTokenDb.Value);
             var badRequestDetail = string.Empty;
 
             // Check if refresh token is correct
@@ -157,7 +161,7 @@ namespace Concert.DataAccess.API.Controllers
             {
                 badRequestDetail = "User has no refresh token.";
             }
-            else if (refreshTokenDb.Value != refreshRequestDto.RefreshToken)
+            else if (refreshTokenDbDecryptedValue != refreshRequestDto.RefreshToken)
             {
                 badRequestDetail = "Refresh token is invalid.";
             }
@@ -219,7 +223,8 @@ namespace Concert.DataAccess.API.Controllers
         {
             LoggerHelper<AuthController>.LogCalledEndpoint(_logger, HttpContext);
 
-            var refreshTokenToBeDeleted = await _refreshTokenRepository.GetByTokenValueAsync(revokeRequestDto.RefreshToken);
+            var refreshTokenEncryptedValue = _encryptionService.Encrypt(revokeRequestDto.RefreshToken);
+            var refreshTokenToBeDeleted = await _refreshTokenRepository.GetByTokenValueAsync(refreshTokenEncryptedValue);
 
             if (refreshTokenToBeDeleted == null)
             {
@@ -294,10 +299,12 @@ namespace Concert.DataAccess.API.Controllers
             var accessToken = _authRepository.CreateAccessToken(claims);
             var refreshToken = _authRepository.CreateRefreshToken();
 
+            var refreshTokenEncryptedValue = _encryptionService.Encrypt(refreshToken.Value);
+
             // Manage refresh token
             var refreshTokenEntity = new RefreshToken()
             {
-                Value = refreshToken.Value,
+                Value = refreshTokenEncryptedValue,
                 ExpiryDate = refreshToken.ExpiresAt,
                 UserName = userName
             };
