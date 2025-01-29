@@ -137,7 +137,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 var problemDetails = new ProblemDetails()
                 {
                     Status = StatusCodes.Status401Unauthorized,
-                    Title = "You are not authorized to access this resource.",
+                    Title = "You aren't authorized to access this resource.",
                 };
 
                 if (context.Error is not null && context.ErrorDescription is not null)
@@ -160,7 +160,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 var problemDetails = new ProblemDetails()
                 {
                     Status = StatusCodes.Status403Forbidden,
-                    Title = "You do not have permission to access this resource."
+                    Title = "You don't have permission to access this resource."
                 };
 
                 context.Response.ContentType = "application/json";

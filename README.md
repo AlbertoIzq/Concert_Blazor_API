@@ -84,6 +84,8 @@ _TODO_
   - Implement refresh token as well
   - Implement GetAll method only for Admin to retrieve also soft deleted items
   - Split Delete endpoint into Delete and HardDelete to be able to allow only Admin to use HardDelete
+  - Add a running background service, like I did in Library Manager???
+  - Add CreatedBy, UpdatedBy and DeletedBy fields to Base Entity
  
 _BUGS_
 

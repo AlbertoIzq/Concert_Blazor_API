@@ -172,10 +172,26 @@ namespace Concert.DataAccess.API.Controllers
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        [Authorize(Roles = BackConstants.WRITER_ROLE_NAME)]
+        [Authorize(Roles = BackConstants.WRITER_ROLE_NAME + "," + BackConstants.ADMIN_ROLE_NAME)]
         public async Task<IActionResult> Delete([FromRoute] int id, [FromQuery] bool hardDelete = false)
         {
             LoggerHelper<SongRequestsController>.LogCalledEndpoint(_logger, HttpContext);
+
+            // Only Admin role can do a hard delete
+            if (hardDelete && !User.IsInRole(BackConstants.ADMIN_ROLE_NAME))
+            {
+                var problemDetails = new ProblemDetails()
+                {
+                    Status = StatusCodes.Status403Forbidden,
+                    Title = "You don't have permission to access this resource."
+                };
+
+                // Return a 403 Forbidden response
+                return new ObjectResult(problemDetails)
+                {
+                    StatusCode = StatusCodes.Status403Forbidden
+                };
+            }
 
             SongRequest? songRequestDomainModel;
             // Perform a hard or soft delete from database - Domain Model
