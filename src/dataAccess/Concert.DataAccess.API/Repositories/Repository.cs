@@ -23,9 +23,12 @@ namespace Concert.DataAccess.API.Repositories
             return entity;
         }
 
-        public async Task<IEnumerable<T>> GetAllAsync()
+        public async Task<IEnumerable<T>> GetAllAsync(bool includeSoftDeleted)
         {
-            return await _dbSet.ToListAsync();
+            return includeSoftDeleted ?
+                await _dbSet.IgnoreQueryFilters().ToListAsync() // Ignore the general filter for soft deleted entities
+                : await _dbSet.ToListAsync();
+
         }
 
         public async Task<T?> GetByIdAsync(int id)

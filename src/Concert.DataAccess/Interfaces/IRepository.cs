@@ -5,7 +5,12 @@ namespace Concert.DataAccess.Interfaces
     public interface IRepository<T> where T : BaseEntity
     {
         Task<T> CreateAsync(T entity);
-        Task<IEnumerable<T>> GetAllAsync();
+        /// <summary>
+        /// Get all entities from the database
+        /// </summary>
+        /// <param name="includeSoftDeleted">Include soft deleted entities</param>
+        /// <returns></returns>
+        Task<IEnumerable<T>> GetAllAsync(bool includeSoftDeleted);
         Task<T?> GetByIdAsync(int id);
         /// <summary>
         /// Delete the entity completely from the database

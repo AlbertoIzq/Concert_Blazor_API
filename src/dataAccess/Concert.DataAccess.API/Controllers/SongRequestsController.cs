@@ -60,13 +60,29 @@ namespace Concert.DataAccess.API.Controllers
         /// <returns></returns>
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        [Authorize(Roles = BackConstants.READER_ROLE_NAME)]
-        public async Task<IActionResult> GetAll()
+        [Authorize(Roles = BackConstants.READER_ROLE_NAME + "," + BackConstants.ADMIN_ROLE_NAME)]
+        public async Task<IActionResult> GetAll([FromQuery] bool includeSoftDeleted = false)
         {
             LoggerHelper<SongRequestsController>.LogCalledEndpoint(_logger, HttpContext);
 
+            // Only Admin role can retrieve soft deleted entities
+            if (includeSoftDeleted && !User.IsInRole(BackConstants.ADMIN_ROLE_NAME))
+            {
+                var problemDetails = new ProblemDetails()
+                {
+                    Status = StatusCodes.Status403Forbidden,
+                    Title = "You don't have permission to access this resource."
+                };
+
+                // Return a 403 Forbidden response
+                return new ObjectResult(problemDetails)
+                {
+                    StatusCode = StatusCodes.Status403Forbidden
+                };
+            }
+
             // Get all song requests
-            var songRequestsDomainModel = await _unitOfWork.SongRequests.GetAllAsync();
+            var songRequestsDomainModel = await _unitOfWork.SongRequests.GetAllAsync(includeSoftDeleted);
 
             // Map Domain Model to DTO
             var songRequestsDto = _mapper.Map<List<SongRequestDto>>(songRequestsDomainModel);

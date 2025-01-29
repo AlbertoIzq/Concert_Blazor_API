@@ -81,9 +81,6 @@ _TODO_
   - Repository
     - RestoreAsync: In response distinguish between Not existing entity and Entity already restored scenarios
 	- Add RemoveRange method
-  - Implement refresh token as well
-  - Implement GetAll method only for Admin to retrieve also soft deleted items
-  - Split Delete endpoint into Delete and HardDelete to be able to allow only Admin to use HardDelete
   - Add a running background service, like I did in Library Manager???
   - Add CreatedBy, UpdatedBy and DeletedBy fields to Base Entity
  
