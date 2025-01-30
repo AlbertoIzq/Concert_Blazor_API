@@ -35,12 +35,12 @@ namespace Concert.DataAccess.API.Controllers
 
         /// <summary>
         /// POST: api/auth/Register
+        /// Register a new user with Reader role
         /// </summary>
         /// <param name="registerRequestDto"></param>
         /// <returns></returns>
         [HttpPost]
         [Route("Register")]
-        [TypeFilter(typeof(AuthRegisterRolesValidationFilterAttribute))]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> Register([FromBody] RegisterRequestDto registerRequestDto)
@@ -49,14 +49,14 @@ namespace Concert.DataAccess.API.Controllers
 
             var identityUser = new IdentityUser()
             {
-                UserName = registerRequestDto.Username,
-                Email = registerRequestDto.Username
+                UserName = registerRequestDto.UserEmail,
+                Email = registerRequestDto.UserEmail
             };
             var identityResult = await _userManager.CreateAsync(identityUser, registerRequestDto.Password);
             if (identityResult.Succeeded)
             {
-                // Add roles to the user
-                identityResult = await _userManager.AddToRolesAsync(identityUser, registerRequestDto.Roles);
+                // Add Reader role to the user
+                identityResult = await _userManager.AddToRoleAsync(identityUser, BackConstants.READER_ROLE_NAME);
 
                 if (identityResult.Succeeded)
                 {

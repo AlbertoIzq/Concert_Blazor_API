@@ -23,7 +23,7 @@ namespace Concert.DataAccess.API.Filters.ActionFilters
         {
             base.OnActionExecuting(context);
 
-            var registerRequestDto = context.ActionArguments["registerRequestDto"] as RegisterRequestDto;
+            var createUserRequestDto = context.ActionArguments["createUserRequestDto"] as CreateUserRequestDto;
 
             var problemDetails = new ProblemDetails()
             {
@@ -31,15 +31,15 @@ namespace Concert.DataAccess.API.Filters.ActionFilters
                 Title = "It was not possible to register the user."
             };
 
-            if (registerRequestDto is not null)
+            if (createUserRequestDto is not null)
             {
-                if (!registerRequestDto.Roles.Any() || string.IsNullOrEmpty(registerRequestDto.Roles.FirstOrDefault()))
+                if (!createUserRequestDto.Roles.Any() || string.IsNullOrEmpty(createUserRequestDto.Roles.FirstOrDefault()))
                 {
                     problemDetails.Detail = "There were no roles provided.";
                 }
                 else
                 {
-                    foreach (var role in registerRequestDto.Roles)
+                    foreach (var role in createUserRequestDto.Roles)
                     {
                         if (role != BackConstants.READER_ROLE_NAME &&
                             role != BackConstants.WRITER_ROLE_NAME &&

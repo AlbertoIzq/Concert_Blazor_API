@@ -90,7 +90,6 @@ _TODO_
 	- Best practices:
 	  - Register:
 	    - Limit registration: Implement email verification before enabling the account
-		- Restrict Public Registration to the Lowest Role (Reader), in Register endpoint allow only Reader role
 		- Log and monitor user registrations (include IP-Address and User-Agent)
 	  - Login:
 	    - Rate limiting to prevent brute-force attacks: Used to restrict the number of requests a user/IP can make
