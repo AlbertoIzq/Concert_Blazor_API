@@ -84,7 +84,6 @@ _TODO_
   - Add a running background service, like I did in Library Manager???
   - Add CreatedBy, UpdatedBy and DeletedBy fields to Base Entity
   - Authentication&Authorization
-	- Create CreateUser endpoint authorized only for Admin to create new users with all available roles
 	- (Idea) Implement roleEnum to store all available roles
 	- Set tokens to work depending on logged in device
 	- Best practices:

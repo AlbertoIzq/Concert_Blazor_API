@@ -7,7 +7,7 @@ namespace Concert.Business.Models.Domain
         [Required]
         [EmailAddress]
         [DataType(DataType.EmailAddress)]
-        public string Username { get; set; }
+        public string UserEmail { get; set; }
         [Required]
         [DataType(DataType.Password)]
         public string Password { get; set; }

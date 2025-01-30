@@ -73,7 +73,8 @@ namespace Concert.DataAccess.API.Controllers
         }
 
         /// <summary>
-        /// POST:api/auth/Login
+        /// POST: api/auth/Login
+        /// Login to get access and refresh tokens
         /// </summary>
         /// <param name="loginRequestDto"></param>
         /// <returns></returns>
@@ -134,7 +135,48 @@ namespace Concert.DataAccess.API.Controllers
         }
 
         /// <summary>
+        /// POST: api/auth/CreateUser
+        /// </summary>
+        /// <param name="createUserRequestDto"></param>
+        /// <returns></returns>
+        [HttpPost]
+        [Route("CreateUser")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [TypeFilter(typeof(AuthRegisterRolesValidationFilterAttribute))]
+        [Authorize(Roles = BackConstants.ADMIN_ROLE_NAME)]
+        public async Task<IActionResult> CreateUser(CreateUserRequestDto createUserRequestDto)
+        {
+            LoggerHelper<AuthController>.LogCalledEndpoint(_logger, HttpContext);
+
+            var identityUser = new IdentityUser()
+            {
+                UserName = createUserRequestDto.UserEmail,
+                Email = createUserRequestDto.UserEmail
+            };
+            var identityResult = await _userManager.CreateAsync(identityUser, createUserRequestDto.Password);
+            if (identityResult.Succeeded)
+            {
+                // Add Reader role to the user
+                identityResult = await _userManager.AddToRolesAsync(identityUser, createUserRequestDto.Roles);
+
+                if (identityResult.Succeeded)
+                {
+                    var okMessage = "User was registered succesfully! Please login";
+                    LoggerHelper<AuthController>.LogResultEndpoint(_logger, HttpContext, "Ok", okMessage);
+                    return Ok(new { result = okMessage });
+                }
+            }
+
+            var problemDetails = GetRegisterErrors(identityResult);
+
+            LoggerHelper<AuthController>.LogResultEndpoint(_logger, HttpContext, "Bad Request", problemDetails);
+            return BadRequest(problemDetails);
+        }
+
+        /// <summary>
         /// POST:api/auth/Refresh
+        /// Refresh refresh token
         /// </summary>
         /// <param name="loginRequestDto"></param>
         /// <returns></returns>
@@ -214,6 +256,12 @@ namespace Concert.DataAccess.API.Controllers
             return Ok(response);      
         }
 
+        /// <summary>
+        /// POST: api/auth/Revoke
+        /// Revoke refresh token
+        /// </summary>
+        /// <param name="revokeRequestDto"></param>
+        /// <returns></returns>
         [HttpPost]
         [Route("Revoke")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
