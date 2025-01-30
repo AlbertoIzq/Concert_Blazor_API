@@ -19,57 +19,23 @@ using System.Text;
 var builder = WebApplication.CreateBuilder(args);
 
 // Environment variables management.
-
-string envName = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
-
-// Read environment variables.
-new EnvLoader().Load();
-var envVarReader = new EnvReader();
-
-// Get connection strings.
 string connectionString = string.Empty;
 string connectionStringAuth = string.Empty;
 
-if (envName == Environments.Development)
-{
-    connectionString = envVarReader["DataBase_ConnectionString"];
-    connectionStringAuth = envVarReader["DataBaseAuth_ConnectionString"];
-}
-else if (envName == Environments.Production)
-{
-    connectionString = Environment.GetEnvironmentVariable("DataBase_ConnectionString");
-    connectionStringAuth = Environment.GetEnvironmentVariable("DataBaseAuth_ConnectionString");
-}
+string jwtSecretKey = string.Empty;
+string jwtIssuer = string.Empty;
+string jwtAudience = string.Empty;
 
-// Get JWT parameters.
-string jwtSecretKey = envVarReader["Jwt_SecretKey"];
-string jwtIssuer = envVarReader["Jwt_Issuer"];
-string jwtAudience = envVarReader["Jwt_Audience"];
+string encryptionSecretKey = string.Empty;
 
-// Get encryption parameter.
-string encryptionSecretKey = envVarReader["Encryption_SecretKey"];
+ReadEnvironmentVariables();
 
 // Add services to the container.
 
 builder.Services.AddControllers();
 
 // Configure Cors (Cross-origin resource sharing) to allow API requests from the frontend.
-builder.Services.AddCors(options =>
-{
-    options.AddPolicy("AllowAll", builder =>
-    {
-        builder.AllowAnyOrigin()
-               .AllowAnyMethod()
-               .AllowAnyHeader();
-    });
-
-    options.AddPolicy("AllowBlazorApp", builder =>
-    {
-        builder.WithOrigins("https://localhost:7079", "http://localhost:5155")
-               .AllowAnyMethod()
-               .AllowAnyHeader();
-    });
-});
+ConfigureCorsPolicies();
 
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
@@ -90,25 +56,120 @@ builder.Services.AddSingleton<IEncryptionService>(provider =>
 // Add Automapper.
 builder.Services.AddAutoMapper(typeof(AutoMapperProfiles));
 
-// Add Identity.
-builder.Services.AddIdentityCore<IdentityUser>()
-    .AddRoles<IdentityRole>()
-    .AddTokenProvider<DataProtectorTokenProvider<IdentityUser>>("Concert")
-    .AddEntityFrameworkStores<ConcertAuthDbContext>()
-    .AddDefaultTokenProviders(); // Used to generate tokens to reset passwords, change emails, etc.
-// Configure password settings.
-builder.Services.Configure<IdentityOptions>(options =>
-{
-    options.Password.RequireDigit = true;
-    options.Password.RequireLowercase = true;
-    options.Password.RequireUppercase = true;
-    options.Password.RequireNonAlphanumeric = true;
-    options.Password.RequiredLength = 10;
-    options.Password.RequiredUniqueChars = 1;
-});
+// AddIdentityAndConfigurePassword.
+AddIdentityAndConfigurePassword();
 
-// Add JWT Authentication.
-builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+// AddJwtAuthentication.
+AddJwtAuthentication();
+
+// Add Serilog.
+AddSerilog();
+
+var app = builder.Build();
+
+// Use the CORS policy.
+app.UseCors("AllowBlazorApp");
+
+// Configure the HTTP request pipeline.
+if (app.Environment.IsDevelopment())
+{
+    app.MapOpenApi();
+    app.MapScalarApiReference(options =>
+    {
+        options.WithTitle("Concert API");
+        options.WithTheme(ScalarTheme.Saturn);
+        options.WithDefaultHttpClient(ScalarTarget.CSharp, ScalarClient.HttpClient);
+    });
+}
+
+app.UseHttpsRedirection();
+
+app.UseAuthentication();
+app.UseAuthorization();
+
+// Middlewares.
+app.UseMiddleware<ExceptionHandlerMiddleware>();
+app.UseMiddleware<RouteIdValidationMiddleware>();
+app.UseMiddleware<ModelValidationMiddleware>();
+
+app.MapControllers();
+
+app.Run();
+
+// Helpers
+
+void ReadEnvironmentVariables()
+{
+    string envName = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
+
+    // Read environment variables.
+    new EnvLoader().Load();
+    var envVarReader = new EnvReader();
+
+    // Get connection strings.
+    if (envName == Environments.Development)
+    {
+        connectionString = envVarReader["DataBase_ConnectionString"];
+        connectionStringAuth = envVarReader["DataBaseAuth_ConnectionString"];
+    }
+    else if (envName == Environments.Production)
+    {
+        connectionString = Environment.GetEnvironmentVariable("DataBase_ConnectionString");
+        connectionStringAuth = Environment.GetEnvironmentVariable("DataBaseAuth_ConnectionString");
+    }
+
+    // Get JWT parameters.
+    jwtSecretKey = envVarReader["Jwt_SecretKey"];
+    jwtIssuer = envVarReader["Jwt_Issuer"];
+    jwtAudience = envVarReader["Jwt_Audience"];
+
+    // Get encryption parameter.
+    encryptionSecretKey = envVarReader["Encryption_SecretKey"];
+}
+
+void ConfigureCorsPolicies()
+{
+    builder.Services.AddCors(options =>
+    {
+        options.AddPolicy("AllowAll", builder =>
+        {
+            builder.AllowAnyOrigin()
+                   .AllowAnyMethod()
+                   .AllowAnyHeader();
+        });
+
+        options.AddPolicy("AllowBlazorApp", builder =>
+        {
+            builder.WithOrigins("https://localhost:7079", "http://localhost:5155")
+                   .AllowAnyMethod()
+                   .AllowAnyHeader();
+        });
+    });
+}
+
+void AddIdentityAndConfigurePassword()
+{
+    // Add Identity.
+    builder.Services.AddIdentityCore<IdentityUser>()
+        .AddRoles<IdentityRole>()
+        .AddTokenProvider<DataProtectorTokenProvider<IdentityUser>>("Concert")
+        .AddEntityFrameworkStores<ConcertAuthDbContext>()
+        .AddDefaultTokenProviders(); // Used to generate tokens to reset passwords, change emails, etc.
+                                     // Configure password settings.
+    builder.Services.Configure<IdentityOptions>(options =>
+    {
+        options.Password.RequireDigit = true;
+        options.Password.RequireLowercase = true;
+        options.Password.RequireUppercase = true;
+        options.Password.RequireNonAlphanumeric = true;
+        options.Password.RequiredLength = 10;
+        options.Password.RequiredUniqueChars = 1;
+    });
+}
+
+void AddJwtAuthentication()
+{
+    builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
         options.TokenValidationParameters = new TokenValidationParameters
@@ -170,9 +231,11 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             }
         };
     });
+}
 
-// Add Serilog.
-var logger = new LoggerConfiguration()
+void AddSerilog()
+{
+    var logger = new LoggerConfiguration()
     .WriteTo.File(
         path: BackConstants.API_LOGS_FILE_FULL_PATH,
         rollingInterval: RollingInterval.Day,
@@ -183,36 +246,6 @@ var logger = new LoggerConfiguration()
     // To log as information from Microsoft only lifetime events.
     .MinimumLevel.Override("Microsoft.Hosting.Lifetime", LogEventLevel.Information)
     .CreateLogger();
-builder.Logging.ClearProviders();
-builder.Logging.AddSerilog(logger);
-
-var app = builder.Build();
-
-// Use the CORS policy.
-app.UseCors("AllowBlazorApp");
-
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
-    app.MapOpenApi();
-    app.MapScalarApiReference(options =>
-    {
-        options.WithTitle("Concert API");
-        options.WithTheme(ScalarTheme.Saturn);
-        options.WithDefaultHttpClient(ScalarTarget.CSharp, ScalarClient.HttpClient);
-    });
+    builder.Logging.ClearProviders();
+    builder.Logging.AddSerilog(logger);
 }
-
-app.UseHttpsRedirection();
-
-app.UseAuthentication();
-app.UseAuthorization();
-
-// Middlewares.
-app.UseMiddleware<ExceptionHandlerMiddleware>();
-app.UseMiddleware<RouteIdValidationMiddleware>();
-app.UseMiddleware<ModelValidationMiddleware>();
-
-app.MapControllers();
-
-app.Run();
