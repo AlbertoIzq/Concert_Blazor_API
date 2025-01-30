@@ -15,37 +15,12 @@ namespace Concert.DataAccess.API.Data
 
         public DbSet<RefreshToken> RefreshTokens { get; set; }
 
-
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
 
-            var roles = new List<IdentityRole>()
-            {
-                new IdentityRole
-                {
-                    Id = BackConstants.ADMIN_ROLE_ID,
-                    ConcurrencyStamp = BackConstants.ADMIN_ROLE_ID,
-                    Name = BackConstants.ADMIN_ROLE_NAME,
-                    NormalizedName = BackConstants.ADMIN_ROLE_NAME.ToUpper()
-                },
-                new IdentityRole
-                {
-                    Id = BackConstants.READER_ROLE_ID,
-                    ConcurrencyStamp = BackConstants.READER_ROLE_ID,
-                    Name = BackConstants.READER_ROLE_NAME,
-                    NormalizedName = BackConstants.READER_ROLE_NAME.ToUpper()
-                },
-                new IdentityRole
-                {
-                    Id = BackConstants.WRITER_ROLE_ID,
-                    ConcurrencyStamp = BackConstants.WRITER_ROLE_ID,
-                    Name = BackConstants.WRITER_ROLE_NAME,
-                    NormalizedName = BackConstants.WRITER_ROLE_NAME.ToUpper()
-                }
-            };
-
-            modelBuilder.Entity<IdentityRole>().HasData(roles);
+            // Seed roles to the database
+            modelBuilder.Entity<IdentityRole>().HasData(IdentityRolesIniData());
 
             // Configure the RefreshToken entity
             modelBuilder.Entity<RefreshToken>(entity =>
@@ -55,6 +30,36 @@ namespace Concert.DataAccess.API.Data
                 entity.Property(e => e.Value).IsRequired();
                 entity.Property(e => e.ExpiryDate).IsRequired();
             });
+        }
+
+        private List<IdentityRole> IdentityRolesIniData()
+        {
+            var _roles = new List<IdentityRole>()
+            {
+                new IdentityRole
+                {
+                    Id = BackConstants.ADMIN_ROLE_ID,
+                    Name = BackConstants.ADMIN_ROLE_NAME,
+                    NormalizedName = BackConstants.ADMIN_ROLE_NAME.ToUpper(),
+                    ConcurrencyStamp = BackConstants.ADMIN_ROLE_CONCURRENCY_STAMP
+                },
+                new IdentityRole
+                {
+                    Id = BackConstants.READER_ROLE_ID,
+                    Name = BackConstants.READER_ROLE_NAME,
+                    NormalizedName = BackConstants.READER_ROLE_NAME.ToUpper(),
+                    ConcurrencyStamp = BackConstants.READER_ROLE_CONCURRENCY_STAMP
+                },
+                new IdentityRole
+                {
+                    Id = BackConstants.WRITER_ROLE_ID,
+                    Name = BackConstants.WRITER_ROLE_NAME,
+                    NormalizedName = BackConstants.WRITER_ROLE_NAME.ToUpper(),
+                    ConcurrencyStamp = BackConstants.WRITER_ROLE_CONCURRENCY_STAMP
+                }
+            };
+
+            return _roles;
         }
     }
 }

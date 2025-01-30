@@ -60,6 +60,7 @@ namespace Concert.DataAccess.API.Controllers
         /// <returns></returns>
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [Authorize(Roles = BackConstants.READER_ROLE_NAME + "," + BackConstants.ADMIN_ROLE_NAME)]
         public async Task<IActionResult> GetAll([FromQuery] bool includeSoftDeleted = false)
         {
@@ -188,6 +189,7 @@ namespace Concert.DataAccess.API.Controllers
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [Authorize(Roles = BackConstants.WRITER_ROLE_NAME + "," + BackConstants.ADMIN_ROLE_NAME)]
         public async Task<IActionResult> Delete([FromRoute] int id, [FromQuery] bool hardDelete = false)
         {

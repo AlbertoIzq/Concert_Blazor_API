@@ -83,6 +83,23 @@ _TODO_
 	- Add RemoveRange method
   - Add a running background service, like I did in Library Manager???
   - Add CreatedBy, UpdatedBy and DeletedBy fields to Base Entity
+  - Authentication&Authorization
+	- Create CreateUser endpoint authorized only for Admin to create new users with all available roles
+	- (Idea) Implement roleEnum to store all available roles
+	- Set tokens to work depending on logged in device
+	- Best practices:
+	  - Register:
+	    - Limit registration: Implement email verification before enabling the account
+		- Restrict Public Registration to the Lowest Role (Reader), in Register endpoint allow only Reader role
+		- Log and monitor user registrations (include IP-Address and User-Agent)
+	  - Login:
+	    - Rate limiting to prevent brute-force attacks: Used to restrict the number of requests a user/IP can make
+		- Lock account after multiple failed attempts
+		- Log login attempts
+	  - Revoke:
+	    - Only authenticated users
+		- Admins can revoke any user's token
+		- Users can revoke only their own token: To log out or handle security issues like their token was stolen
  
 _BUGS_
 

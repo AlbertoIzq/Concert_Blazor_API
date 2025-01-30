@@ -22,6 +22,9 @@ var builder = WebApplication.CreateBuilder(args);
 string connectionString = string.Empty;
 string connectionStringAuth = string.Empty;
 
+string adminUserName = string.Empty;
+string adminUserPassword = string.Empty;
+
 string jwtSecretKey = string.Empty;
 string jwtIssuer = string.Empty;
 string jwtAudience = string.Empty;
@@ -67,6 +70,20 @@ AddSerilog();
 
 var app = builder.Build();
 
+// Run database migrations automatically and seed Admin user.
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+    var dbContext = services.GetRequiredService<ConcertAuthDbContext>();
+
+    dbContext.Database.Migrate(); // Ensures database is up-to-date
+
+    var userManager = services.GetRequiredService<UserManager<IdentityUser>>();
+    var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
+
+    await SeedAdminUser(userManager, roleManager, adminUserName, adminUserPassword);
+}
+
 // Use the CORS policy.
 app.UseCors("AllowBlazorApp");
 
@@ -96,7 +113,7 @@ app.MapControllers();
 
 app.Run();
 
-// Helpers
+#region Helpers
 
 void ReadEnvironmentVariables()
 {
@@ -117,6 +134,10 @@ void ReadEnvironmentVariables()
         connectionString = Environment.GetEnvironmentVariable("DataBase_ConnectionString");
         connectionStringAuth = Environment.GetEnvironmentVariable("DataBaseAuth_ConnectionString");
     }
+
+    // Get Admin user parameters.
+    adminUserName = envVarReader["DatabaseAuth_AdminUser_Email"];
+    adminUserPassword = envVarReader["DatabaseAuth_AdminUser_Password"];
 
     // Get JWT parameters.
     jwtSecretKey = envVarReader["Jwt_SecretKey"];
@@ -249,3 +270,43 @@ void AddSerilog()
     builder.Logging.ClearProviders();
     builder.Logging.AddSerilog(logger);
 }
+
+#endregion
+
+#region DatabaseHelpers
+
+async Task SeedAdminUser(UserManager<IdentityUser> userManager, RoleManager<IdentityRole> roleManager,
+    string adminName, string adminPassword)
+{
+    var adminUser = await userManager.FindByEmailAsync(adminName);
+    if (adminUser is null)
+    {
+        adminUser = AdminUserIniData(adminName);
+
+        var result = await userManager.CreateAsync(adminUser, adminPassword);
+        if (result.Succeeded)
+        {
+            await userManager.AddToRoleAsync(adminUser, BackConstants.ADMIN_ROLE_NAME);
+            await userManager.AddToRoleAsync(adminUser, BackConstants.READER_ROLE_NAME);
+            await userManager.AddToRoleAsync(adminUser, BackConstants.WRITER_ROLE_NAME);
+        }
+    }
+}
+
+IdentityUser AdminUserIniData(string userName)
+{
+    var _adminUser = new IdentityUser()
+    {
+        Id = BackConstants.ADMIN_USER_ID,
+        UserName = userName,
+        NormalizedUserName = userName.ToUpper(),
+        Email = userName,
+        NormalizedEmail = userName.ToUpper(),
+        EmailConfirmed = true,
+        SecurityStamp = Guid.NewGuid().ToString(),
+        ConcurrencyStamp = Guid.NewGuid().ToString(),
+    };
+    return _adminUser;
+}
+
+#endregion
