@@ -1,3 +1,4 @@
+﻿using Concert.Business.Constants;
 ﻿using Concert.UIWasm.Helpers;
 using System.Net.Http.Json;
 using System.Text;
@@ -8,9 +9,6 @@ namespace Concert.UIWasm.Data
     public class WebApiExecuter : IWebApiExecuter
     {
         private readonly HttpClient _httpClient;
-        private readonly string HttpRequestExceptionMessage = "Unable to reach the server. Please try again later.";
-        private readonly string WebApiExceptionMessage = "An unexpected error occurred, the API request was unsuccessful.";
-        private readonly string ExceptionMessage = "An unexpected error occurred.";
 
         public WebApiExecuter(HttpClient httpClient)
         {
@@ -34,8 +32,8 @@ namespace Concert.UIWasm.Data
             }
             catch (HttpRequestException ex)
             {
-                LoggerHelper.LogException(HttpRequestExceptionMessage, ex);
-                throw new Exception(HttpRequestExceptionMessage, ex);
+                LoggerHelper.LogException(FrontConstants.HTTPREQUEST_EXCEPTION_MESSAGE, ex);
+                throw new Exception(FrontConstants.HTTPREQUEST_EXCEPTION_MESSAGE, ex);
             }
             catch (WebApiException ex)
             {
@@ -46,8 +44,8 @@ namespace Concert.UIWasm.Data
             }
             catch (Exception ex)
             {
-                LoggerHelper.LogException(ExceptionMessage, ex);
-                throw new Exception(ExceptionMessage, ex);
+                LoggerHelper.LogException(FrontConstants.EXCEPTION_MESSAGE, ex);
+                throw new Exception(FrontConstants.EXCEPTION_MESSAGE, ex);
             }
         }
 
@@ -66,8 +64,8 @@ namespace Concert.UIWasm.Data
             }
             catch (HttpRequestException ex)
             {
-                LoggerHelper.LogException(HttpRequestExceptionMessage, ex);
-                throw new Exception(HttpRequestExceptionMessage, ex);
+                LoggerHelper.LogException(FrontConstants.HTTPREQUEST_EXCEPTION_MESSAGE, ex);
+                throw new Exception(FrontConstants.HTTPREQUEST_EXCEPTION_MESSAGE, ex);
             }
             catch (WebApiException ex)
             {
@@ -78,8 +76,8 @@ namespace Concert.UIWasm.Data
             }
             catch (Exception ex)
             {
-                LoggerHelper.LogException(ExceptionMessage, ex);
-                throw new Exception(ExceptionMessage, ex);
+                LoggerHelper.LogException(FrontConstants.EXCEPTION_MESSAGE, ex);
+                throw new Exception(FrontConstants.EXCEPTION_MESSAGE, ex);
             }
         }
 
@@ -100,8 +98,8 @@ namespace Concert.UIWasm.Data
             }
             catch (HttpRequestException ex)
             {
-                LoggerHelper.LogException(HttpRequestExceptionMessage, ex);
-                throw new Exception(HttpRequestExceptionMessage, ex);
+                LoggerHelper.LogException(FrontConstants.HTTPREQUEST_EXCEPTION_MESSAGE, ex);
+                throw new Exception(FrontConstants.HTTPREQUEST_EXCEPTION_MESSAGE, ex);
             }
             catch (WebApiException ex)
             {
@@ -112,8 +110,8 @@ namespace Concert.UIWasm.Data
             }
             catch (Exception ex)
             {
-                LoggerHelper.LogException(ExceptionMessage, ex);
-                throw new Exception(ExceptionMessage, ex);
+                LoggerHelper.LogException(FrontConstants.EXCEPTION_MESSAGE, ex);
+                throw new Exception(FrontConstants.EXCEPTION_MESSAGE, ex);
             }
         }
 
@@ -130,8 +128,8 @@ namespace Concert.UIWasm.Data
             }
             catch (HttpRequestException ex)
             {
-                LoggerHelper.LogException(HttpRequestExceptionMessage, ex);
-                throw new Exception(HttpRequestExceptionMessage, ex);
+                LoggerHelper.LogException(FrontConstants.HTTPREQUEST_EXCEPTION_MESSAGE, ex);
+                throw new Exception(FrontConstants.HTTPREQUEST_EXCEPTION_MESSAGE, ex);
             }
             catch (WebApiException ex)
             {
@@ -142,8 +140,8 @@ namespace Concert.UIWasm.Data
             }
             catch (Exception ex)
             {
-                LoggerHelper.LogException(ExceptionMessage, ex);
-                throw new Exception(ExceptionMessage, ex);
+                LoggerHelper.LogException(FrontConstants.EXCEPTION_MESSAGE, ex);
+                throw new Exception(FrontConstants.EXCEPTION_MESSAGE, ex);
             }
         }
 
