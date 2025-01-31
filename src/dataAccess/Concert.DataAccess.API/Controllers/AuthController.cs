@@ -258,7 +258,8 @@ namespace Concert.DataAccess.API.Controllers
 
         /// <summary>
         /// POST: api/auth/Revoke
-        /// Revoke refresh token
+        /// Revoke refresh token. User can only revoke his own refresh token,
+        /// except Admin user who can revoke any
         /// </summary>
         /// <param name="revokeRequestDto"></param>
         /// <returns></returns>
@@ -266,10 +267,14 @@ namespace Concert.DataAccess.API.Controllers
         [Route("Revoke")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        [Authorize(Roles = BackConstants.ADMIN_ROLE_NAME)]
+        [Authorize]
         public async Task<IActionResult> Revoke(RevokeRequestDto revokeRequestDto)
         {
             LoggerHelper<AuthController>.LogCalledEndpoint(_logger, HttpContext);
+
+            // Get the currently authenticated user
+            var userName = User.FindFirst(ClaimTypes.Email)?.Value;
+            var userRoles = User.FindAll(ClaimTypes.Role).Select(r => r.Value).ToList();
 
             var refreshTokenEncryptedValue = _encryptionService.Encrypt(revokeRequestDto.RefreshToken);
             var refreshTokenToBeDeleted = await _refreshTokenRepository.GetByTokenValueAsync(refreshTokenEncryptedValue);
@@ -286,7 +291,30 @@ namespace Concert.DataAccess.API.Controllers
                 LoggerHelper<AuthController>.LogResultEndpoint(_logger, HttpContext, "Not Found", problemDetails);
                 return NotFound(problemDetails);
             }
-            
+
+            // Check if the user is an admin
+            bool isAdmin = userRoles.Contains(BackConstants.ADMIN_ROLE_NAME);
+
+            // Check if the user is revoking their own token
+            bool isOwner = refreshTokenToBeDeleted.UserName == userName;
+
+            // Admin can revoke all tokens, and no admin users can only revoke their own token
+            if (!isAdmin && !isOwner)
+            {
+                var problemDetails = new ProblemDetails()
+                {
+                    Status = StatusCodes.Status403Forbidden,
+                    Title = "Forbidden.",
+                    Detail = "You aren't authorized to revoke this refresh token."
+                };
+
+                // Return a 403 Forbidden response
+                return new ObjectResult(problemDetails)
+                {
+                    StatusCode = StatusCodes.Status403Forbidden
+                };
+            }
+
             var refreshTokenDeleted = await _refreshTokenRepository.DeleteAsync(refreshTokenToBeDeleted.Id);
             LoggerHelper<AuthController>.LogResultEndpoint(_logger, HttpContext, "No Content");
 

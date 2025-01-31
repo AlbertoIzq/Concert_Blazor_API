@@ -46,6 +46,7 @@ _CONCEPTS USED_
   - Asynchronous programming
   - Authentication and authorization, refresh token-based
   - Json Web Token (JWT) for access token
+  - ????Backend-for-frontend pattern (BFF): Used to manage Blazor authorization&authentication in the API
 
 - FRONTEND
   - Exception handling in API calls
@@ -94,10 +95,6 @@ _TODO_
 	    - Rate limiting to prevent brute-force attacks: Used to restrict the number of requests a user/IP can make
 		- Lock account after multiple failed attempts
 		- Log login attempts
-	  - Revoke:
-	    - Only authenticated users
-		- Admins can revoke any user's token
-		- Users can revoke only their own token: To log out or handle security issues like their token was stolen
  
 _BUGS_
 
