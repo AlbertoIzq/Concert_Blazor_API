@@ -6,5 +6,6 @@
         Task<T?> InvokeGet<T>(string relativeUrl);
         Task InvokePut<T>(string relativeUrl, T obj);
         Task InvokeDelete(string relativeUrl);
+        Task<HttpResponseMessage> InvokePostWithResponse<T>(string relativeUrl, T obj);
     }
 }

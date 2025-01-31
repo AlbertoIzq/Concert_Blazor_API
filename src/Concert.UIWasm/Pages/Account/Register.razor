@@ -1,0 +1,125 @@
+﻿@page "/register"
+
+<PageTitle>Account - Register</PageTitle>
+
+@inject NavigationManager NavigationManager
+@inject IWebApiExecuter WebApiExecuter
+@inject IToastService ToastService
+
+<h3>Register</h3>
+<br />
+@if (!string.IsNullOrEmpty(errorMessage))
+{
+    <div>
+        <p class="text-danger">@errorMessage</p>
+    </div>
+}
+else if (registerRequest is null)
+{
+    <div>
+        <p><em>Loading...</em></p>
+    </div>
+}
+else
+{
+    @if(!string.IsNullOrEmpty(badRequestMessage))
+    {
+        <div>
+            <p class="text-danger">@(new MarkupString(badRequestMessage))</p>
+        </div>
+    }
+    <EditForm Model="registerRequest" FormName="formRegister" OnValidSubmit="Submit">
+        <DataAnnotationsValidator></DataAnnotationsValidator>
+        <ValidationSummary></ValidationSummary>
+        <FieldComponent Label="Email">
+            <Control>
+                <InputText @bind-Value="registerRequest.UserEmail" class="form-control"
+                placeholder=@{
+                       $"{FrontConstants.PLACEHOLDER_EX_TEXT}{FrontConstants.REGISTER_EX_EMAIL}"
+                       }></InputText>
+            </Control>
+            <ValidationControl>
+                <ValidationMessage For="() => registerRequest.UserEmail"></ValidationMessage>
+            </ValidationControl>
+        </FieldComponent>
+        <FieldComponent Label="Password">
+            <Control>
+                <InputText @bind-Value="registerRequest.Password" class="form-control" type="password"
+                placeholder=@{
+                       $"{FrontConstants.PLACEHOLDER_EX_TEXT}{FrontConstants.REGISTER_EX_PASSWORD}"
+                       }></InputText>
+            </Control>
+            <ValidationControl>
+                <ValidationMessage For="() => registerRequest.Password"></ValidationMessage>
+            </ValidationControl>
+        </FieldComponent>
+        <br />
+        <button class="btn btn-primary" type="submit">Register</button>
+    </EditForm>
+}
+
+@code {
+    private string? errorMessage = string.Empty;
+    private string? badRequestMessage = string.Empty;
+
+    [SupplyParameterFromForm]
+    private RegisterRequestDto? registerRequest { get; set; }
+
+    protected override void OnParametersSet()
+    {
+        errorMessage = string.Empty;
+
+        try
+        {
+            registerRequest ??= new RegisterRequestDto();
+            errorMessage = string.Empty;
+        }
+        catch (Exception ex)
+        {
+            errorMessage = ex.Message;
+        }
+        finally
+        {
+            StateHasChanged();
+        }
+    }
+
+    private async Task Submit()
+    {
+        try
+        {
+            var response = await WebApiExecuter.InvokePostWithResponse<RegisterRequestDto>("Auth/Register", registerRequest);
+            errorMessage = string.Empty;
+            badRequestMessage = string.Empty;
+
+            if (response.IsSuccessStatusCode)
+            {
+                ToastService.ShowSuccess("User registered successfully");
+                NavigationManager.NavigateTo("/login");
+            }
+            else
+            {
+                string responseContent = await response.Content.ReadAsStringAsync();
+                var customProblemDetails = JsonSerializer.Deserialize<CustomProblemDetailsDto>(responseContent, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                if (customProblemDetails.Errors.Count() > 0)
+                {
+                    foreach (var item in customProblemDetails.Errors)
+                    {
+                        foreach (var item2 in item.Value)
+                        {
+                            badRequestMessage += item2 + "<br>";
+                        }
+                    }
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = ex.Message;
+        }
+        finally
+        {
+            StateHasChanged();
+        }
+    }
+}

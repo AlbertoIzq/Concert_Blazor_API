@@ -1,5 +1,5 @@
 ﻿using Concert.Business.Constants;
-﻿using Concert.UIWasm.Helpers;
+using Concert.UIWasm.Helpers;
 using System.Net.Http.Json;
 using System.Text;
 using System.Text.Json;
@@ -9,7 +9,7 @@ namespace Concert.UIWasm.Data
     public class WebApiExecuter : IWebApiExecuter
     {
         private readonly HttpClient _httpClient;
-
+        
         public WebApiExecuter(HttpClient httpClient)
         {
             _httpClient = httpClient;
@@ -37,7 +37,7 @@ namespace Concert.UIWasm.Data
             }
             catch (WebApiException ex)
             {
-                string message = ex.ProblemDetails?.Title ?? WebApiExceptionMessage;
+                string message = ex.ProblemDetails?.Title ?? FrontConstants.WEBAPI_EXCEPTION_MESSAGE;
                 int status = ex.ProblemDetails?.Status ?? 0;
                 LoggerHelper.LogWebApiException(message, relativeUrl, httpMethod, status, ex);
                 throw new Exception(message, ex);
@@ -69,7 +69,7 @@ namespace Concert.UIWasm.Data
             }
             catch (WebApiException ex)
             {
-                string message = ex.ProblemDetails?.Title ?? WebApiExceptionMessage;
+                string message = ex.ProblemDetails?.Title ?? FrontConstants.WEBAPI_EXCEPTION_MESSAGE;
                 int status = ex.ProblemDetails?.Status ?? 0;
                 LoggerHelper.LogWebApiException(message, relativeUrl, httpMethod, status, ex);
                 throw new Exception(message, ex);
@@ -103,7 +103,7 @@ namespace Concert.UIWasm.Data
             }
             catch (WebApiException ex)
             {
-                string message = ex.ProblemDetails?.Title ?? WebApiExceptionMessage;
+                string message = ex.ProblemDetails?.Title ?? FrontConstants.WEBAPI_EXCEPTION_MESSAGE;
                 int status = ex.ProblemDetails?.Status ?? 0;
                 LoggerHelper.LogWebApiException(message, relativeUrl, httpMethod, status, ex);
                 throw new Exception(message, ex);
@@ -133,10 +133,36 @@ namespace Concert.UIWasm.Data
             }
             catch (WebApiException ex)
             {
-                string message = ex.ProblemDetails?.Title ?? WebApiExceptionMessage;
+                string message = ex.ProblemDetails?.Title ?? FrontConstants.WEBAPI_EXCEPTION_MESSAGE;
                 int status = ex.ProblemDetails?.Status ?? 0;
                 LoggerHelper.LogWebApiException(message, relativeUrl, httpMethod, status, ex);
                 throw new Exception(message, ex);
+            }
+            catch (Exception ex)
+            {
+                LoggerHelper.LogException(FrontConstants.EXCEPTION_MESSAGE, ex);
+                throw new Exception(FrontConstants.EXCEPTION_MESSAGE, ex);
+            }
+        }
+
+        public async Task<HttpResponseMessage> InvokePostWithResponse<T>(string relativeUrl, T obj)
+        {
+            var httpMethod = HttpMethod.Post;
+
+            try
+            {
+                var httpRequest = new HttpRequestMessage(httpMethod, relativeUrl)
+                {
+                    Content = new StringContent(JsonSerializer.Serialize(obj), Encoding.UTF8, "application/json")
+                };
+                // You could also do: var httpResponse = await _httpClient.PostAsJsonAsync(relativeUrl, obj);
+                var httpResponse = await _httpClient.SendAsync(httpRequest);
+                return httpResponse;
+            }
+            catch (HttpRequestException ex)
+            {
+                LoggerHelper.LogException(FrontConstants.HTTPREQUEST_EXCEPTION_MESSAGE, ex);
+                throw new Exception(FrontConstants.HTTPREQUEST_EXCEPTION_MESSAGE, ex);
             }
             catch (Exception ex)
             {

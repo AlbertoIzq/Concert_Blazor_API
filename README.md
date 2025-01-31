@@ -46,7 +46,7 @@ _CONCEPTS USED_
   - Asynchronous programming
   - Authentication and authorization, refresh token-based
   - Json Web Token (JWT) for access token
-  - ????Backend-for-frontend pattern (BFF): Used to manage Blazor authorization&authentication in the API
+  - Backend-for-frontend pattern (BFF): Used to manage Blazor authorization&authentication in the API
 
 - FRONTEND
   - Exception handling in API calls

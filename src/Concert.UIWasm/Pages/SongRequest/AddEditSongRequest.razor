@@ -1,6 +1,4 @@
 ﻿@page "/song-request/{id:int?}"
-@using Concert.Business.Models.View
-@using Concert.UIWasm.Data
 
 <PageTitle>Song requests - Add/Edit</PageTitle>
 
@@ -142,7 +140,7 @@ else
                 }
                 else
                 {
-                    await WebApiExecuter.InvokePost<SongRequestView>($"songrequests", songRequest);
+                    await WebApiExecuter.InvokePost<SongRequestView>("songrequests", songRequest);
                     ToastService.ShowSuccess("SongRequest created successfully");
                 }
             }
