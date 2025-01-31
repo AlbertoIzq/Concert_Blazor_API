@@ -40,7 +40,10 @@ else
         }
         <FieldComponent Label="Artist">
             <Control>
-                <InputText @bind-Value="songRequest.Artist" class="form-control"></InputText>
+                <InputText @bind-Value="songRequest.Artist" class="form-control"
+                placeholder=@{
+                    $"{FrontConstants.PLACEHOLDER_EX_TEXT}{FrontConstants.SONGREQUEST_EX_ARTIST}"
+                }></InputText>
             </Control>
             <ValidationControl>
                 <ValidationMessage For="() => songRequest.Artist"></ValidationMessage>
@@ -48,7 +51,10 @@ else
         </FieldComponent>
         <FieldComponent Label="Title">
             <Control>
-                <InputText @bind-Value="songRequest.Title" class="form-control"></InputText>
+                <InputText @bind-Value="songRequest.Title" class="form-control"
+                placeholder=@{
+                    $"{FrontConstants.PLACEHOLDER_EX_TEXT}{FrontConstants.SONGREQUEST_EX_TITLE}"
+                }></InputText>
             </Control>
             <ValidationControl>
                 <ValidationMessage For="() => songRequest.Title"></ValidationMessage>
@@ -56,7 +62,10 @@ else
         </FieldComponent>
         <FieldComponent Label="Genre">
             <Control>
-                <InputText @bind-Value="songRequest.Genre" class="form-control"></InputText>
+                <InputText @bind-Value="songRequest.Genre" class="form-control"
+                placeholder=@{
+                    $"{FrontConstants.PLACEHOLDER_EX_TEXT}{FrontConstants.SONGREQUEST_EX_GENRE}"
+                }></InputText>
             </Control>
             <ValidationControl>
                 <ValidationMessage For="() => songRequest.Genre"></ValidationMessage>
@@ -64,7 +73,10 @@ else
         </FieldComponent>
         <FieldComponent Label="Language">
             <Control>
-                <InputText @bind-Value="songRequest.Language" class="form-control"></InputText>
+                <InputText @bind-Value="songRequest.Language" class="form-control"
+                placeholder=@{
+                    $"{FrontConstants.PLACEHOLDER_EX_TEXT}{FrontConstants.SONGREQUEST_EX_LANGUAGE}"
+                }></InputText>
             </Control>
             <ValidationControl>
                 <ValidationMessage For="() => songRequest.Language"></ValidationMessage>
