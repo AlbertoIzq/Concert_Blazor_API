@@ -1,7 +1,119 @@
 ﻿@page "/login"
 
-<h3>Login page</h3>
+<PageTitle>Account - Login</PageTitle>
+
+@inject NavigationManager NavigationManager
+@inject IWebApiExecuter WebApiExecuter
+@inject IToastService ToastService
+
+<h3>Login</h3>
+<br />
+@if (!string.IsNullOrEmpty(errorMessage))
+{
+    <div>
+        <p class="text-danger">@errorMessage</p>
+    </div>
+}
+else if (loginRequest is null)
+{
+    <div>
+        <p><em>Loading...</em></p>
+    </div>
+}
+else
+{
+    @if (!string.IsNullOrEmpty(badRequestMessage))
+    {
+        <div>
+            <p class="text-danger">@(new MarkupString(badRequestMessage))</p>
+        </div>
+    }
+    <EditForm Model="loginRequest" FormName="formLogin" OnValidSubmit="Submit">
+        <DataAnnotationsValidator></DataAnnotationsValidator>
+        <ValidationSummary></ValidationSummary>
+        <FieldComponent Label="Email">
+            <Control>
+                <InputText @bind-Value="loginRequest.Username" class="form-control"
+                placeholder=@{
+                       $"{FrontConstants.PLACEHOLDER_EX_TEXT}{FrontConstants.REGISTER_EX_EMAIL}"
+                       }></InputText>
+            </Control>
+            <ValidationControl>
+                <ValidationMessage For="() => loginRequest.Username"></ValidationMessage>
+            </ValidationControl>
+        </FieldComponent>
+        <FieldComponent Label="Password">
+            <Control>
+                <InputText @bind-Value="loginRequest.Password" class="form-control" type="password"
+                placeholder=@{
+                       $"{FrontConstants.PLACEHOLDER_EX_TEXT}{FrontConstants.REGISTER_EX_PASSWORD}"
+                       }></InputText>
+            </Control>
+            <ValidationControl>
+                <ValidationMessage For="() => loginRequest.Password"></ValidationMessage>
+            </ValidationControl>
+        </FieldComponent>
+        <br />
+        <button class="btn btn-primary" type="submit">Login</button>
+    </EditForm>
+    <br />
+    <span>No account? Please <a class="fw-bolder" href="/Register">click here</a> to register.</span>
+}
 
 @code {
+    private string? errorMessage = string.Empty;
+    private string? badRequestMessage = string.Empty;
 
+    [SupplyParameterFromForm]
+    private LoginRequestDto? loginRequest { get; set; }
+
+    protected override void OnParametersSet()
+    {
+        errorMessage = string.Empty;
+
+        try
+        {
+            loginRequest ??= new LoginRequestDto();
+            errorMessage = string.Empty;
+        }
+        catch (Exception ex)
+        {
+            errorMessage = ex.Message;
+        }
+        finally
+        {
+            StateHasChanged();
+        }
+    }
+
+    private async Task Submit()
+    {
+        try
+        {
+            var response = await WebApiExecuter.InvokePostWithResponse<LoginRequestDto>("Auth/Login", loginRequest);
+            errorMessage = string.Empty;
+            badRequestMessage = string.Empty;
+
+            if (response.IsSuccessStatusCode)
+            {
+                /// @todo save auth cookies
+                ToastService.ShowSuccess("User successfully logged in");
+                NavigationManager.NavigateTo("/");
+            }
+            else
+            {
+                string responseContent = await response.Content.ReadAsStringAsync();
+                var customProblemDetails = JsonSerializer.Deserialize<CustomProblemDetailsDto>(responseContent, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                badRequestMessage = customProblemDetails.Detail;
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = ex.Message;
+        }
+        finally
+        {
+            StateHasChanged();
+        }
+    }
 }
