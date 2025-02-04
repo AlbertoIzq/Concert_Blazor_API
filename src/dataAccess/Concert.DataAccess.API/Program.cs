@@ -6,6 +6,7 @@ using Concert.DataAccess.API.Middlewares;
 using Concert.DataAccess.API.Repositories;
 using Concert.DataAccess.Interfaces;
 using DotEnv.Core;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -63,7 +64,7 @@ builder.Services.AddAutoMapper(typeof(AutoMapperProfiles));
 AddIdentityAndConfigurePassword();
 
 // AddJwtAuthentication.
-AddJwtAuthentication();
+AddJwtAndCookieAuthentication();
 
 // Add Serilog.
 AddSerilog();
@@ -162,6 +163,7 @@ void ConfigureCorsPolicies()
         options.AddPolicy("AllowBlazorApp", builder =>
         {
             builder.WithOrigins("https://localhost:7079", "http://localhost:5155")
+                   .AllowCredentials() // Allow cookies
                    .AllowAnyMethod()
                    .AllowAnyHeader();
         });
@@ -188,9 +190,32 @@ void AddIdentityAndConfigurePassword()
     });
 }
 
-void AddJwtAuthentication()
+void AddJwtAndCookieAuthentication()
 {
-    builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    builder.Services.AddAuthentication(options =>
+    {
+        options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+        options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+        options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+    })
+    .AddCookie("AuthCookie", options =>
+    {
+        options.Cookie.HttpOnly = true; // Prevents JavaScript access (XSS protection)
+        options.Cookie.SecurePolicy = CookieSecurePolicy.Always; // Requires HTTPS
+        options.Cookie.SameSite = SameSiteMode.Strict; // Strict CSRF protection
+        options.Cookie.Name = BackConstants.JWT_TOKEN_COOKIE_NAME;
+        options.ExpireTimeSpan = TimeSpan.FromMinutes(BackConstants.ACCESS_TOKEN_EXPIRATION_MINUTES);
+        options.LoginPath = "/api/auth/Login"; // Redirect path if unauthenticated
+        options.LogoutPath = "/api/auth/Logout"; // Logout path
+    })
+    .AddCookie("RefreshCookie", options =>
+    {
+        options.Cookie.HttpOnly = true;
+        options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+        options.Cookie.SameSite = SameSiteMode.Strict;
+        options.Cookie.Name = BackConstants.REFRESH_TOKEN_COOKIE_NAME;
+        options.ExpireTimeSpan = TimeSpan.FromHours(BackConstants.REFRESH_TOKEN_EXPIRATION_HOURS);
+    })
     .AddJwtBearer(options =>
     {
         options.TokenValidationParameters = new TokenValidationParameters

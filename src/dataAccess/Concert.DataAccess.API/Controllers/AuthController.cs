@@ -73,16 +73,59 @@ namespace Concert.DataAccess.API.Controllers
         }
 
         /// <summary>
+        /// POST: api/auth/CreateUser
+        /// </summary>
+        /// <param name="createUserRequestDto"></param>
+        /// <returns></returns>
+        [HttpPost]
+        [Route("CreateUser")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [TypeFilter(typeof(AuthRegisterRolesValidationFilterAttribute))]
+        [Authorize(Roles = BackConstants.ADMIN_ROLE_NAME)]
+        public async Task<IActionResult> CreateUser(CreateUserRequestDto createUserRequestDto)
+        {
+            LoggerHelper<AuthController>.LogCalledEndpoint(_logger, HttpContext);
+
+            var identityUser = new IdentityUser()
+            {
+                UserName = createUserRequestDto.UserEmail,
+                Email = createUserRequestDto.UserEmail
+            };
+            var identityResult = await _userManager.CreateAsync(identityUser, createUserRequestDto.Password);
+            if (identityResult.Succeeded)
+            {
+                // Add Reader role to the user
+                identityResult = await _userManager.AddToRolesAsync(identityUser, createUserRequestDto.Roles);
+
+                if (identityResult.Succeeded)
+                {
+                    var okMessage = "User was registered succesfully! Please login";
+                    LoggerHelper<AuthController>.LogResultEndpoint(_logger, HttpContext, "Ok", okMessage);
+                    return Ok(new { result = okMessage });
+                }
+            }
+
+            var problemDetails = GetRegisterErrors(identityResult);
+
+            LoggerHelper<AuthController>.LogResultEndpoint(_logger, HttpContext, "Bad Request", problemDetails);
+            return BadRequest(problemDetails);
+        }
+
+        /// <summary>
         /// POST: api/auth/Login
-        /// Login to get access and refresh tokens
+        /// Login to get access and refresh tokens added in response as HTTP-only cookies.
+        /// If API call, add them in the response as well
         /// </summary>
         /// <param name="loginRequestDto"></param>
+        /// <param name="apiRequest">Header parameter "Api-Request", true if API call</param>
         /// <returns></returns>
         [HttpPost]
         [Route("Login")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> Login(LoginRequestDto loginRequestDto)
+        public async Task<IActionResult> Login(LoginRequestDto loginRequestDto,
+            [FromHeader(Name = "Api-Request")] string? apiRequest)
         {
             LoggerHelper<AuthController>.LogCalledEndpoint(_logger, HttpContext);
 
@@ -119,7 +162,37 @@ namespace Concert.DataAccess.API.Controllers
                         
                         LoggerHelper<AuthController>.LogResultEndpoint(_logger, HttpContext, "Ok", responseForLogging);
                         
-                        return Ok(response);
+                        // Set secure HTTP-only cookie for JWT token, for frontend
+                        Response.Cookies.Append(BackConstants.JWT_TOKEN_COOKIE_NAME,
+                            response.AccessToken.Value, new CookieOptions
+                            {
+                                HttpOnly = true,
+                                Secure = true,
+                                SameSite = SameSiteMode.Strict,
+                                Expires = response.AccessToken.ExpiresAt,
+                                Path = "/"
+                            });
+
+                        // Set secure HTTP-only cookie for refresh token, for frontend
+                        Response.Cookies.Append(BackConstants.REFRESH_TOKEN_COOKIE_NAME,
+                            response.RefreshToken.Value, new CookieOptions
+                            {
+                                HttpOnly = true,
+                                Secure = true,
+                                SameSite = SameSiteMode.Strict,
+                                Expires = response.RefreshToken.ExpiresAt,
+                                Path = "/"
+                            });
+
+                        // Return tokens only for API clients
+                        if (!string.IsNullOrEmpty(apiRequest) && apiRequest == "true")
+                        {
+                            return Ok(response);
+                        }
+                        else
+                        {
+                            return Ok(new { message = "User was successfully logged in!" });
+                        }
                     }
                 }
             }
@@ -130,46 +203,6 @@ namespace Concert.DataAccess.API.Controllers
                 Title = "Bad credentials",
                 Detail = "Username or password are incorrect."
             };
-            LoggerHelper<AuthController>.LogResultEndpoint(_logger, HttpContext, "Bad Request", problemDetails);
-            return BadRequest(problemDetails);
-        }
-
-        /// <summary>
-        /// POST: api/auth/CreateUser
-        /// </summary>
-        /// <param name="createUserRequestDto"></param>
-        /// <returns></returns>
-        [HttpPost]
-        [Route("CreateUser")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        [TypeFilter(typeof(AuthRegisterRolesValidationFilterAttribute))]
-        [Authorize(Roles = BackConstants.ADMIN_ROLE_NAME)]
-        public async Task<IActionResult> CreateUser(CreateUserRequestDto createUserRequestDto)
-        {
-            LoggerHelper<AuthController>.LogCalledEndpoint(_logger, HttpContext);
-
-            var identityUser = new IdentityUser()
-            {
-                UserName = createUserRequestDto.UserEmail,
-                Email = createUserRequestDto.UserEmail
-            };
-            var identityResult = await _userManager.CreateAsync(identityUser, createUserRequestDto.Password);
-            if (identityResult.Succeeded)
-            {
-                // Add Reader role to the user
-                identityResult = await _userManager.AddToRolesAsync(identityUser, createUserRequestDto.Roles);
-
-                if (identityResult.Succeeded)
-                {
-                    var okMessage = "User was registered succesfully! Please login";
-                    LoggerHelper<AuthController>.LogResultEndpoint(_logger, HttpContext, "Ok", okMessage);
-                    return Ok(new { result = okMessage });
-                }
-            }
-
-            var problemDetails = GetRegisterErrors(identityResult);
-
             LoggerHelper<AuthController>.LogResultEndpoint(_logger, HttpContext, "Bad Request", problemDetails);
             return BadRequest(problemDetails);
         }

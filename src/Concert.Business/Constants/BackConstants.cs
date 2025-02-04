@@ -21,5 +21,8 @@
         public const int ACCESS_TOKEN_EXPIRATION_MINUTES = 15;
         public const int REFRESH_TOKEN_EXPIRATION_HOURS = 24;
         public const int TOKEN_LAST_NUM_CHARS_LOGGING = 5;
+
+        public const string JWT_TOKEN_COOKIE_NAME = "AuthCookie";
+        public const string REFRESH_TOKEN_COOKIE_NAME = "RefreshCookie";
     }
 }
