@@ -211,7 +211,7 @@ namespace Concert.DataAccess.API.Controllers
         /// POST:api/auth/Refresh
         /// Refresh refresh token
         /// </summary>
-        /// <param name="loginRequestDto"></param>
+        /// <param name="refreshRequestDto"></param>
         /// <returns></returns>
         [HttpPost]
         [Route("Refresh")]
@@ -353,6 +353,32 @@ namespace Concert.DataAccess.API.Controllers
 
             // Return No content back to client
             return NoContent();
+        }
+
+        /// <summary>
+        /// GET: api/auth/UserInfo
+        /// Get authenticated user name and roles
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet]
+        [Route("UserInfo")]
+        [Authorize]
+        public async Task<IActionResult> GetUserInfo()
+        {
+            var user = HttpContext.User;
+
+            if (user.Identity is null || !user.Identity.IsAuthenticated)
+            {
+                return Unauthorized();
+            }
+
+            var userInfo = new UserInfoResponseDto()
+            {
+                Name = user.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email).Value,
+                Roles = user.Claims.Where(c => c.Type == ClaimTypes.Role).Select(c => c.Value).ToList()
+            };
+
+            return Ok(userInfo);
         }
 
         /// <summary>
