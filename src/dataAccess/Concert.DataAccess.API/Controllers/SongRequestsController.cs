@@ -9,8 +9,8 @@ using Microsoft.AspNetCore.Mvc;
 namespace Concert.DataAccess.API.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")]
-    [Authorize]
+    [Route("api/song-requests")]
+    //[Authorize]
     public class SongRequestsController : ControllerBase
     {
         private readonly IUnitOfWork _unitOfWork;

@@ -13,7 +13,7 @@ using System.Security.Claims;
 namespace Concert.DataAccess.API.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("api/auth")]
     public class AuthController : ControllerBase
     {
         private readonly UserManager<IdentityUser> _userManager;
@@ -40,7 +40,7 @@ namespace Concert.DataAccess.API.Controllers
         /// <param name="registerRequestDto"></param>
         /// <returns></returns>
         [HttpPost]
-        [Route("Register")]
+        [Route("register")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> Register([FromBody] RegisterRequestDto registerRequestDto)
@@ -78,7 +78,7 @@ namespace Concert.DataAccess.API.Controllers
         /// <param name="createUserRequestDto"></param>
         /// <returns></returns>
         [HttpPost]
-        [Route("CreateUser")]
+        [Route("create-user")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [TypeFilter(typeof(AuthRegisterRolesValidationFilterAttribute))]
@@ -121,7 +121,7 @@ namespace Concert.DataAccess.API.Controllers
         /// <param name="apiRequest">Header parameter "Api-Request", true if API call</param>
         /// <returns></returns>
         [HttpPost]
-        [Route("Login")]
+        [Route("login")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> Login(LoginRequestDto loginRequestDto,
@@ -214,7 +214,7 @@ namespace Concert.DataAccess.API.Controllers
         /// <param name="refreshRequestDto"></param>
         /// <returns></returns>
         [HttpPost]
-        [Route("Refresh")]
+        [Route("refresh")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> Refresh(RefreshRequestDto refreshRequestDto)
@@ -297,7 +297,7 @@ namespace Concert.DataAccess.API.Controllers
         /// <param name="revokeRequestDto"></param>
         /// <returns></returns>
         [HttpPost]
-        [Route("Revoke")]
+        [Route("revoke")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [Authorize]
@@ -361,7 +361,7 @@ namespace Concert.DataAccess.API.Controllers
         /// </summary>
         /// <returns></returns>
         [HttpGet]
-        [Route("UserInfo")]
+        [Route("user-info")]
         [Authorize]
         public async Task<IActionResult> GetUserInfo()
         {
