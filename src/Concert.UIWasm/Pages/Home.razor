@@ -1,5 +1,4 @@
 ﻿@page "/"
-@using System.Security.Claims
 
 <PageTitle>Home</PageTitle>
 
@@ -7,9 +6,9 @@
 
 <h3>Welcome to ConcertBooking!</h3>
 <br />
-<span>This is a live music on-demand website to book a concert.</span>
+<span>This is a live music on-demand website to book a concert</span>
 <br />
-
+<br />
 <AuthorizeView>
     <Authorized>
         <span>You're logged in as @context.User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email).Value</span>
@@ -17,7 +16,7 @@
         <span>To logout, <a class="fw-bolder" href="/Logout">click here</a></span>
     </Authorized>
     <NotAuthorized>
-        <span>You aren't logged in. Please <a class="fw-bolder" href="/Login">click here</a> to login.</span>
+        <span>You aren't logged in. Please <a class="fw-bolder" href="/Login">click here</a> to login</span>
     </NotAuthorized>
 </AuthorizeView>
 

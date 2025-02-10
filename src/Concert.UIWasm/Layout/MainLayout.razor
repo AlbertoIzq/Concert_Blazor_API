@@ -8,6 +8,7 @@
         <div class="top-row px-4">
             <AuthorizeView>
                 <Authorized>
+                    <span>@context.User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email).Value</span>
                     <a href="/logout">Logout</a>
                 </Authorized>
                 <NotAuthorized>

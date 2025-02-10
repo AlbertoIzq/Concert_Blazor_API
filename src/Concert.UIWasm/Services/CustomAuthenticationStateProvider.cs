@@ -1,7 +1,6 @@
 ﻿using Concert.Business.Models.Domain;
 using Concert.UIWasm.Data;
 using Microsoft.AspNetCore.Components.Authorization;
-using Microsoft.JSInterop;
 using System.Security.Claims;
 
 namespace Concert.UIWasm.Services

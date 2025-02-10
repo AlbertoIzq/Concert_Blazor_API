@@ -1,4 +1,5 @@
 ﻿@page "/song-request/{id:int?}"
+@attribute [Authorize(Roles = BackConstants.WRITER_ROLE_NAME)]
 
 <PageTitle>Song requests - Add/Edit</PageTitle>
 
@@ -109,7 +110,7 @@ else
         {
             if (Id.HasValue)
             {
-                songRequest ??= await WebApiExecuter.InvokeGet<SongRequestView>($"songrequests/{this.Id.Value}");
+                songRequest ??= await WebApiExecuter.InvokeGet<SongRequestView>($"song-requests/{this.Id.Value}");
             }
             else
             {
@@ -135,12 +136,12 @@ else
             {
                 if (this.Id.HasValue)
                 {
-                    await WebApiExecuter.InvokePut<SongRequestView>($"songrequests/{this.Id.Value}", songRequest);
+                    await WebApiExecuter.InvokePut<SongRequestView>($"song-requests/{this.Id.Value}", songRequest);
                     ToastService.ShowSuccess("SongRequest updated successfully");
                 }
                 else
                 {
-                    await WebApiExecuter.InvokePost<SongRequestView>("songrequests", songRequest);
+                    await WebApiExecuter.InvokePost<SongRequestView>("song-requests", songRequest);
                     ToastService.ShowSuccess("SongRequest created successfully");
                 }
             }

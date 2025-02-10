@@ -1,9 +1,5 @@
 ﻿@page "/song-requests"
-@using Concert.Business
-@using Concert.Business.Models.View
-@using Microsoft.AspNetCore.Components.QuickGrid;
-@using Concert.Business.Constants;
-@using Data;
+@attribute [Authorize(Roles =BackConstants.READER_ROLE_NAME)]
 
 <PageTitle>Song requests</PageTitle>
 
