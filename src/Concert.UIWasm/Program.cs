@@ -2,6 +2,8 @@ using Blazored.Modal;
 using Blazored.Toast;
 using Concert.UIWasm;
 using Concert.UIWasm.Data;
+using Concert.UIWasm.Services;
+using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using Serilog;
@@ -15,7 +17,14 @@ builder.RootComponents.Add<HeadOutlet>("head::after");
 // Add services to the container.
 
 // Add HttpClient.
-builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri("https://localhost:7284/api/") });
+builder.Services.AddScoped(sp => new HttpClient(new CookieHandler())
+{
+    BaseAddress = new Uri("https://localhost:7284/api/"),
+    DefaultRequestHeaders =
+    {
+        { "X-Requested-With", "XMLHttpRequest" } // Helps prevent CSRF issues
+    }
+});
 
 // Dependency injection for additional services
 builder.Services.AddScoped<IWebApiExecuter, WebApiExecuter>();
@@ -38,5 +47,12 @@ builder.Services.AddLogging(logging =>
     logging.ClearProviders(); // Remove default logging providers
     logging.AddProvider(new SerilogLoggerProvider(Log.Logger));
 });
+
+// Enable authentication
+builder.Services.AddScoped<CustomAuthenticationStateProvider>();
+builder.Services.AddScoped<AuthenticationStateProvider>(provider =>
+    provider.GetRequiredService<CustomAuthenticationStateProvider>());
+builder.Services.AddAuthorizationCore();
+builder.Services.AddCascadingAuthenticationState();
 
 await builder.Build().RunAsync();

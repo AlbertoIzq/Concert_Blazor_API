@@ -1,0 +1,19 @@
+﻿@page "/logout"
+
+<PageTitle>Account - Logout</PageTitle>
+
+@inject NavigationManager NavigationManager
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject IToastService ToastService
+
+@code {
+    protected override async Task OnInitializedAsync()
+    {
+        if (AuthenticationStateProvider is CustomAuthenticationStateProvider authStateProvider)
+        {
+            await authStateProvider.LogoutAsync();
+            ToastService.ShowSuccess("User successfully logged out");
+            NavigationManager.NavigateTo("/");
+        }
+    }
+}

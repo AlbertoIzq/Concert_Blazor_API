@@ -156,16 +156,17 @@ void ConfigureCorsPolicies()
         options.AddPolicy("AllowAll", builder =>
         {
             builder.AllowAnyOrigin()
-                   .AllowAnyMethod()
-                   .AllowAnyHeader();
+                   .AllowAnyHeader()
+                   .AllowAnyMethod();
+                   
         });
 
         options.AddPolicy("AllowBlazorApp", builder =>
         {
             builder.WithOrigins("https://localhost:7079", "http://localhost:5155")
                    .AllowCredentials() // Allow cookies
-                   .AllowAnyMethod()
-                   .AllowAnyHeader();
+                   .AllowAnyHeader()
+                   .AllowAnyMethod();
         });
     });
 }
@@ -194,19 +195,20 @@ void AddJwtAndCookieAuthentication()
 {
     builder.Services.AddAuthentication(options =>
     {
-        options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-        options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-        options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+        options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme; // Use cookies first
+        options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme; // JWT token as fallback
+        options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme; // Challenge with JWT token
     })
     .AddCookie("AuthCookie", options =>
     {
         options.Cookie.HttpOnly = true; // Prevents JavaScript access (XSS protection)
         options.Cookie.SecurePolicy = CookieSecurePolicy.Always; // Requires HTTPS
-        options.Cookie.SameSite = SameSiteMode.Strict; // Strict CSRF protection
+        options.Cookie.SameSite = SameSiteMode.None;
         options.Cookie.Name = BackConstants.JWT_TOKEN_COOKIE_NAME;
         options.ExpireTimeSpan = TimeSpan.FromMinutes(BackConstants.ACCESS_TOKEN_EXPIRATION_MINUTES);
-        options.LoginPath = "/api/auth/Login"; // Redirect path if unauthenticated
-        options.LogoutPath = "/api/auth/Logout"; // Logout path
+        options.LoginPath = "/login"; // Redirect path if unauthenticated
+        options.LogoutPath = "/logout"; // Logout path
+        options.AccessDeniedPath = "/access-denied";
     })
     .AddCookie("RefreshCookie", options =>
     {
@@ -230,6 +232,15 @@ void AddJwtAndCookieAuthentication()
         };
         options.Events = new JwtBearerEvents
         {
+            // Used to be able to read the JWT token from the cookie
+            OnMessageReceived = context =>
+            {
+                if (context.Request.Cookies.ContainsKey(BackConstants.JWT_TOKEN_COOKIE_NAME))
+                {
+                    context.Token = context.Request.Cookies[BackConstants.JWT_TOKEN_COOKIE_NAME];
+                }
+                return Task.CompletedTask;
+            },
             OnChallenge = async context =>
             {
                 // Suppress the default challenge behavior so there's not an exception

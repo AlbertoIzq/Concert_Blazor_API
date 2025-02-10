@@ -7,6 +7,8 @@
 
 <PageTitle>Song requests</PageTitle>
 
+@using Microsoft.AspNetCore.Components.QuickGrid;
+
 @inject IWebApiExecuter WebApiExecuter
 @inject IToastService ToastService
 
@@ -94,7 +96,7 @@ else
                 var result = await ShowModal();
                 if (result.Confirmed)
                 {
-                    await WebApiExecuter.InvokeDelete($"songrequests/{id}");
+                    await WebApiExecuter.InvokeDelete($"song-requests/{id}");
                     ToastService.ShowSuccess("SongRequest deleted successfully");
                     // Used to refresh the page
                     await GetAll();
@@ -115,7 +117,7 @@ else
     {
         try
         {
-            songRequests = await WebApiExecuter.InvokeGet<List<SongRequestView>>("songrequests");
+            songRequests = await WebApiExecuter.InvokeGet<List<SongRequestView>>("song-requests");
             errorMessage = string.Empty;
         }
         catch (Exception ex)

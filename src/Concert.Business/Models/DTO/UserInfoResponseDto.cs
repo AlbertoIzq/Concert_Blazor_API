@@ -6,5 +6,6 @@ namespace Concert.Business.Models.Domain
     {
         public string Name { get; set; }
         public List<string> Roles { get; set; }
+        public List<UserClaimDto> Claims { get; set; }
     }
 }

@@ -88,7 +88,7 @@ else
     {
         try
         {
-            var response = await WebApiExecuter.InvokePostWithResponse<RegisterRequestDto>("Auth/Register", registerRequest);
+            var response = await WebApiExecuter.InvokePostWithResponse<RegisterRequestDto>("auth/register", registerRequest);
             errorMessage = string.Empty;
             badRequestMessage = string.Empty;
 

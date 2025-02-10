@@ -6,8 +6,15 @@
 
     <main>
         <div class="top-row px-4">
-            <a href="/Register">Register</a>
-            <a href="/Login">Login</a>
+            <AuthorizeView>
+                <Authorized>
+                    <a href="/logout">Logout</a>
+                </Authorized>
+                <NotAuthorized>
+                    <a href="/register">Register</a>
+                    <a href="/login">Login</a>
+                </NotAuthorized>
+            </AuthorizeView>
             <a href="https://learn.microsoft.com/aspnet/core/" target="_blank">About</a>
         </div>
 

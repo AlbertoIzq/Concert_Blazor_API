@@ -168,7 +168,7 @@ namespace Concert.DataAccess.API.Controllers
                             {
                                 HttpOnly = true,
                                 Secure = true,
-                                SameSite = SameSiteMode.Strict,
+                                SameSite = SameSiteMode.None, // Required for cross-origin requests
                                 Expires = response.AccessToken.ExpiresAt,
                                 Path = "/"
                             });
@@ -179,7 +179,7 @@ namespace Concert.DataAccess.API.Controllers
                             {
                                 HttpOnly = true,
                                 Secure = true,
-                                SameSite = SameSiteMode.Strict,
+                                SameSite = SameSiteMode.None,
                                 Expires = response.RefreshToken.ExpiresAt,
                                 Path = "/"
                             });
@@ -206,6 +206,30 @@ namespace Concert.DataAccess.API.Controllers
             LoggerHelper<AuthController>.LogResultEndpoint(_logger, HttpContext, "Bad Request", problemDetails);
             return BadRequest(problemDetails);
         }
+
+        [HttpPost]
+        [Route("logout")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        public async Task<IActionResult> Logout()
+        {
+            LoggerHelper<AuthController>.LogCalledEndpoint(_logger, HttpContext);
+
+            if (Request.Cookies[BackConstants.JWT_TOKEN_COOKIE_NAME] is not null)
+            {
+                Response.Cookies.Delete(BackConstants.JWT_TOKEN_COOKIE_NAME);
+            }
+
+            if (Request.Cookies[BackConstants.REFRESH_TOKEN_COOKIE_NAME] is not null)
+            {
+                Response.Cookies.Delete(BackConstants.REFRESH_TOKEN_COOKIE_NAME);
+            }
+
+            var okMessage = "User was logged out succesfully!";
+            LoggerHelper<AuthController>.LogResultEndpoint(_logger, HttpContext, "Ok", okMessage);
+
+            return Ok(new { result = okMessage });
+        }
+
 
         /// <summary>
         /// POST:api/auth/Refresh
@@ -375,7 +399,13 @@ namespace Concert.DataAccess.API.Controllers
             var userInfo = new UserInfoResponseDto()
             {
                 Name = user.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email).Value,
-                Roles = user.Claims.Where(c => c.Type == ClaimTypes.Role).Select(c => c.Value).ToList()
+                Roles = user.Claims
+                    .Where(c => c.Type == ClaimTypes.Role)
+                    .Select(c => c.Value)
+                    .ToList(),
+                Claims = user.Claims
+                    .Select(c => new UserClaimDto { Type = c.Type, Value = c.Value })
+                    .ToList()
             };
 
             return Ok(userInfo);

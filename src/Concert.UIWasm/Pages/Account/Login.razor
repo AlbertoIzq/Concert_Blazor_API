@@ -3,7 +3,7 @@
 <PageTitle>Account - Login</PageTitle>
 
 @inject NavigationManager NavigationManager
-@inject IWebApiExecuter WebApiExecuter
+@inject AuthenticationStateProvider AuthenticationStateProvider
 @inject IToastService ToastService
 
 <h3>Login</h3>
@@ -28,7 +28,7 @@ else
             <p class="text-danger">@(new MarkupString(badRequestMessage))</p>
         </div>
     }
-    <EditForm Model="loginRequest" FormName="formLogin" OnValidSubmit="Submit">
+    <EditForm Model="loginRequest" FormName="formLogin" OnValidSubmit="SubmitLogin">
         <DataAnnotationsValidator></DataAnnotationsValidator>
         <ValidationSummary></ValidationSummary>
         <FieldComponent Label="Email">
@@ -86,25 +86,27 @@ else
         }
     }
 
-    private async Task Submit()
+    private async Task SubmitLogin()
     {
         try
         {
-            var response = await WebApiExecuter.InvokePostWithResponse<LoginRequestDto>("Auth/Login", loginRequest);
-            errorMessage = string.Empty;
-            badRequestMessage = string.Empty;
+            if (AuthenticationStateProvider is CustomAuthenticationStateProvider authStateProvider)
+            {
+                var response = await authStateProvider.LoginAsync(loginRequest);
+                errorMessage = string.Empty;
+                badRequestMessage = string.Empty;
 
-            if (response.IsSuccessStatusCode)
-            {
-                /// @todo save auth cookies
-                ToastService.ShowSuccess("User successfully logged in");
-                NavigationManager.NavigateTo("/");
-            }
-            else
-            {
-                string responseContent = await response.Content.ReadAsStringAsync();
-                var customProblemDetails = JsonSerializer.Deserialize<CustomProblemDetailsDto>(responseContent, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-                badRequestMessage = customProblemDetails.Detail;
+                if (response.IsSuccessStatusCode)
+                {
+                    ToastService.ShowSuccess("User successfully logged in");
+                    NavigationManager.NavigateTo("/");
+                }
+                else
+                {
+                    string responseContent = await response.Content.ReadAsStringAsync();
+                    var customProblemDetails = JsonSerializer.Deserialize<CustomProblemDetailsDto>(responseContent, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                    badRequestMessage = customProblemDetails.Detail;
+                }
             }
         }
         catch (Exception ex)
