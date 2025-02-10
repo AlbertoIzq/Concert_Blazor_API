@@ -38,7 +38,6 @@ _CONCEPTS USED_
 	  - DataAccess.InMemory: Class library project with an in-memory database used as a PoC (Proof Of Concept)
 	- UIWasm: Blazor WebAssembly standalone project
 	- Business: Class library project with business logic
-	- Shared: Class library project with shared functionality
   - REST API (Representational State Transfer)
   - Design patterns: Repository, Unit of work, Dependency injection
   - Environment variables
@@ -47,12 +46,15 @@ _CONCEPTS USED_
   - Authentication and authorization, refresh token-based
   - Json Web Token (JWT) for access token
   - Backend-for-frontend pattern (BFF): Used to manage Blazor authorization&authentication in the API
+    - JWT token for external API calls
+	- HTTP only cookie used for frontend calls
 
 - FRONTEND
   - Exception handling in API calls
   - Logging Exceptions into BrowserConsole
   - Toast notifications
   - Modal messages
+  - Cookies used to manage authentication & authorization with authentication state provider
 
 - BACKEND
   - CRUD operations, with hard and soft deletes
