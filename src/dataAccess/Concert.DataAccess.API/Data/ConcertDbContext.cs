@@ -134,6 +134,10 @@ namespace Concert.DataAccess.API.Data
                             auditEntries.Add(auditEntry);
                         }
                     }
+                    else
+                    {
+                        auditEntries.Add(auditEntry);
+                    }
                 }
             }
 

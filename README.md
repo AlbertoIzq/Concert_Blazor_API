@@ -68,6 +68,7 @@ _CONCEPTS USED_
 	- API requests
 	- API responses
   - Advanced Encryption Standard (AES) to store refresh token value in database
+  - AuditLog table to log all changes in db (added, modified, soft deleted, restored and deleted entities)
 
 _TODO_
 
@@ -84,8 +85,8 @@ _TODO_
   - Repository
     - RestoreAsync: In response distinguish between Not existing entity and Entity already restored scenarios
 	- Add RemoveRange method
+	- If soft deleted already, you must be able to deleted without restoring it first
   - Add a running background service, like I did in Library Manager???
-  - Add CreatedBy, UpdatedBy and DeletedBy fields to Base Entity
   - Authentication&Authorization
 	- (Idea) Implement roleEnum to store all available roles
 	- Set tokens to work depending on logged in device

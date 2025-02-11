@@ -114,8 +114,8 @@ namespace Concert.DataAccess.API.Controllers
 
         /// <summary>
         /// POST: api/auth/Login
-        /// Login to get access and refresh tokens added in response as HTTP-only cookies.
-        /// If API call, add them in the response as well
+        /// Login to get access and refresh tokens. If frontend call, tokens are added in response as HTTP-only cookies
+        /// and if API call, they are added in the response body
         /// </summary>
         /// <param name="loginRequestDto"></param>
         /// <param name="apiRequest">Header parameter "Api-Request", true if API call</param>
@@ -161,36 +161,37 @@ namespace Concert.DataAccess.API.Controllers
                         };
                         
                         LoggerHelper<AuthController>.LogResultEndpoint(_logger, HttpContext, "Ok", responseForLogging);
-                        
-                        // Set secure HTTP-only cookie for JWT token, for frontend
-                        Response.Cookies.Append(BackConstants.JWT_TOKEN_COOKIE_NAME,
-                            response.AccessToken.Value, new CookieOptions
-                            {
-                                HttpOnly = true,
-                                Secure = true,
-                                SameSite = SameSiteMode.None, // Required for cross-origin requests
-                                Expires = response.AccessToken.ExpiresAt,
-                                Path = "/"
-                            });
-
-                        // Set secure HTTP-only cookie for refresh token, for frontend
-                        Response.Cookies.Append(BackConstants.REFRESH_TOKEN_COOKIE_NAME,
-                            response.RefreshToken.Value, new CookieOptions
-                            {
-                                HttpOnly = true,
-                                Secure = true,
-                                SameSite = SameSiteMode.None,
-                                Expires = response.RefreshToken.ExpiresAt,
-                                Path = "/"
-                            });
 
                         // Return tokens only for API clients
                         if (!string.IsNullOrEmpty(apiRequest) && apiRequest == "true")
                         {
                             return Ok(response);
                         }
+                        // Set secure HTTP-only cookies for frontend
                         else
                         {
+                            // Cookie for JWT token
+                            Response.Cookies.Append(BackConstants.JWT_TOKEN_COOKIE_NAME,
+                                response.AccessToken.Value, new CookieOptions
+                                {
+                                    HttpOnly = true,
+                                    Secure = true,
+                                    SameSite = SameSiteMode.None, // Required for cross-origin requests
+                                    Expires = response.AccessToken.ExpiresAt,
+                                    Path = "/"
+                                });
+
+                            // Cookie for refresh token
+                            Response.Cookies.Append(BackConstants.REFRESH_TOKEN_COOKIE_NAME,
+                                response.RefreshToken.Value, new CookieOptions
+                                {
+                                    HttpOnly = true,
+                                    Secure = true,
+                                    SameSite = SameSiteMode.None,
+                                    Expires = response.RefreshToken.ExpiresAt,
+                                    Path = "/"
+                                });
+
                             return Ok(new { message = "User was successfully logged in!" });
                         }
                     }
