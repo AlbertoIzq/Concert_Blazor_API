@@ -90,12 +90,29 @@ namespace Concert.DataAccess.API.Data
                     // Capture changes as JSON
                     if (entry.State == EntityState.Modified)
                     {
-                        auditEntry.Changes = JsonSerializer.Serialize(entry.OriginalValues.Properties
-                            .ToDictionary(p => p.Name, p => new
+                        var changes = new Dictionary<string, object>();
+
+                        foreach (var property in entry.OriginalValues.Properties)
+                        {
+                            var originalValue = entry.OriginalValues[property];
+                            var currentValue = entry.CurrentValues[property];
+
+                            // Only log changed properties
+                            if (!Equals(originalValue, currentValue)) 
                             {
-                                OldValue = entry.OriginalValues[p],
-                                NewValue = entry.CurrentValues[p]
-                            }));
+                                changes[property.Name] = new
+                                {
+                                    OldValue = originalValue,
+                                    NewValue = currentValue
+                                };
+                            }
+                        }
+
+                        // Only assign them if there are actual changes
+                        if (changes.Any()) 
+                        {
+                            auditEntry.Changes = JsonSerializer.Serialize(changes);
+                        }
                     }
 
                     auditEntries.Add(auditEntry);
