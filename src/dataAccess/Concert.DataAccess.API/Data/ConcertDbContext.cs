@@ -112,13 +112,13 @@ namespace Concert.DataAccess.API.Data
                         }
 
                         // Only assign them if there are actual changes
-                        if (changes.Any()) 
+                        // meaning that at least one property is changed apart from UpdatedAt
+                        if (changes.Count() > 1) 
                         {
                             auditEntry.Changes = JsonSerializer.Serialize(changes);
+                            auditEntries.Add(auditEntry);
                         }
                     }
-
-                    auditEntries.Add(auditEntry);
                 }
             }
 
