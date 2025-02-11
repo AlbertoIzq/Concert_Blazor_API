@@ -94,6 +94,8 @@ namespace Concert.DataAccess.API.Data
                     if (entry.State == EntityState.Modified)
                     {
                         var changes = new Dictionary<string, object>();
+                        bool isDeletedChanged = false;
+                        bool isSoftDeleted = false;
 
                         foreach (var property in entry.OriginalValues.Properties)
                         {
@@ -108,7 +110,20 @@ namespace Concert.DataAccess.API.Data
                                     OldValue = originalValue,
                                     NewValue = currentValue
                                 };
+
+                                // Check for IsDeleted change
+                                if (property.Name == "IsDeleted")
+                                {
+                                    isDeletedChanged = true;
+                                    isSoftDeleted = (bool)currentValue;
+                                }
                             }
+                        }
+
+                        // Determine audit action based on IsDeleted changes
+                        if (isDeletedChanged)
+                        {
+                            auditEntry.Action = isSoftDeleted ? "SoftDeleted" : "Restored";
                         }
 
                         // Only assign them if there are actual changes
