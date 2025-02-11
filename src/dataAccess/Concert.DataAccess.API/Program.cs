@@ -69,6 +69,8 @@ AddJwtAndCookieAuthentication();
 // Add Serilog.
 AddSerilog();
 
+builder.Services.AddHttpContextAccessor();
+
 var app = builder.Build();
 
 // Run database migrations automatically and seed Admin user.

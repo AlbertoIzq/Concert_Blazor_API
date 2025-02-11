@@ -141,7 +141,7 @@ namespace Concert.DataAccess.API.Controllers
 
                     if (roles is not null)
                     {
-                        var claims = CreateClaimsForTokenGeneration(loginRequestDto.Username, (List<string>)roles);
+                        var claims = CreateClaimsForTokenGeneration(identityUser.Id, identityUser.Email, (List<string>)roles);
                         var response = await CreateTokens(claims);
 
                         var responseForLogging = new LoginRefreshResponseDto()
@@ -493,15 +493,16 @@ namespace Concert.DataAccess.API.Controllers
         }
 
         /// <summary>
-        /// Create Email claim and Roles claims for access token generation
+        /// Create Email claim, NameIdentifier claim (user Id) and Roles claims for access token generation
         /// </summary>
         /// <param name="userEmail"></param>
         /// <param name="roles"></param>
         /// <returns></returns>
-        private List<Claim> CreateClaimsForTokenGeneration(string userEmail, List<string> roles)
+        private List<Claim> CreateClaimsForTokenGeneration(string userId, string userEmail, List<string> roles)
         {
             var claims = new List<Claim>();
 
+            claims.Add(new Claim(ClaimTypes.NameIdentifier, userId));
             claims.Add(new Claim(ClaimTypes.Email, userEmail));
 
             foreach (var role in roles)
