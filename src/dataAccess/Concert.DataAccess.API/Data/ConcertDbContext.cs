@@ -59,6 +59,7 @@ namespace Concert.DataAccess.API.Data
         public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
         {
             var auditEntries = new List<AuditLog>();
+            var pendingAddedEntities = new List<(object entity, AuditLog auditEntry)>();
 
             foreach (var entry in ChangeTracker.Entries())
             {
@@ -74,15 +75,17 @@ namespace Concert.DataAccess.API.Data
                         Timestamp = DateTime.UtcNow
                     };
 
-                    // Handle newly added entities
+                    // Handle newly added entities differently
                     if (entry.State == EntityState.Added)
                     {
-                        // Use a temporary placeholder or skip adding "Id" until the entity is saved
+                        // Use a temporary placeholder until the entity is saved to retrieve its Id
                         auditEntry.RecordId = 0;
+                        // Store reference to the entity so you can get its Id later
+                        pendingAddedEntities.Add((entry.Entity, auditEntry));
                     }
                     else
                     {
-                        // For modified and deleted entities, get the real "Id"
+                        // For modified and deleted entities, get the real Id
                         var recordIdProperty = entry.Property("Id");
                         auditEntry.RecordId = recordIdProperty?.CurrentValue as int? ?? 0;
                     }
@@ -119,8 +122,16 @@ namespace Concert.DataAccess.API.Data
                 }
             }
 
-            // Save the original changes first
+            // Save the actual changes to the database first
             var result = await base.SaveChangesAsync(cancellationToken);
+
+            // Now that the entities have been saved, you can update their Ids in the audit log
+            foreach (var (entity, auditEntry) in pendingAddedEntities)
+            {
+                var entityEntry = Entry(entity);
+                var recordIdProperty = entityEntry.Property("Id");
+                auditEntry.RecordId = recordIdProperty?.CurrentValue as int? ?? 0;
+            }
 
             // Save the audit logs
             if (auditEntries.Any())
