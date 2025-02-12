@@ -34,7 +34,7 @@ namespace Concert.DataAccess.API.Controllers
         }
 
         /// <summary>
-        /// POST: api/auth/Register
+        /// POST: api/auth/register
         /// Register a new user with Reader role
         /// </summary>
         /// <param name="registerRequestDto"></param>
@@ -73,7 +73,7 @@ namespace Concert.DataAccess.API.Controllers
         }
 
         /// <summary>
-        /// POST: api/auth/CreateUser
+        /// POST: api/auth/create-user
         /// </summary>
         /// <param name="createUserRequestDto"></param>
         /// <returns></returns>
@@ -113,8 +113,9 @@ namespace Concert.DataAccess.API.Controllers
         }
 
         /// <summary>
-        /// POST: api/auth/Login
-        /// Login to get access and refresh tokens. If frontend call, tokens are added in response as HTTP-only cookies
+        /// POST: api/auth/login
+        /// Login to get access and refresh tokens.
+        /// If frontend call, tokens are added in response as HTTP-only cookies
         /// and if API call, they are added in the response body
         /// </summary>
         /// <param name="loginRequestDto"></param>
@@ -208,6 +209,11 @@ namespace Concert.DataAccess.API.Controllers
             return BadRequest(problemDetails);
         }
 
+        /// <summary>
+        /// POST: api/auth/logout
+        /// Logout by deleting cookies
+        /// </summary>
+        /// <returns></returns>
         [HttpPost]
         [Route("logout")]
         [ProducesResponseType(StatusCodes.Status200OK)]
@@ -231,9 +237,8 @@ namespace Concert.DataAccess.API.Controllers
             return Ok(new { result = okMessage });
         }
 
-
         /// <summary>
-        /// POST:api/auth/Refresh
+        /// POST:api/auth/refresh
         /// Refresh refresh token
         /// </summary>
         /// <param name="refreshRequestDto"></param>
@@ -242,34 +247,54 @@ namespace Concert.DataAccess.API.Controllers
         [Route("refresh")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> Refresh(RefreshRequestDto refreshRequestDto)
+        public async Task<IActionResult> Refresh(RefreshRequestDto? refreshRequestDto,
+            [FromHeader(Name = "Api-Request")] string? apiRequest)
         {
             LoggerHelper<AuthController>.LogCalledEndpoint(_logger, HttpContext);
 
-            string accessToken = refreshRequestDto.AccessToken;
-            string refreshToken = refreshRequestDto.RefreshToken;
-
-            var claimsPrincipal = _authRepository.GetClaimsPrincipalFromExpiredAccessToken(accessToken);
-            var username = claimsPrincipal.FindFirst(ClaimTypes.Email)?.Value;
-
-            var refreshTokenDb = await _refreshTokenRepository.GetByUserNameAsync(username);
-            var refreshTokenDbDecryptedValue = _encryptionService.Decrypt(refreshTokenDb.Value);
+            string refreshToken = string.Empty;
             var badRequestDetail = string.Empty;
 
-            // Check if refresh token is correct
-            if (refreshTokenDb is null)
+            // If API client, read token value from body
+            if (!string.IsNullOrEmpty(apiRequest) && apiRequest == "true")
             {
-                badRequestDetail = "User has no refresh token.";
+                refreshToken = refreshRequestDto.RefreshToken;
             }
-            else if (refreshTokenDbDecryptedValue != refreshRequestDto.RefreshToken)
+            // If frontend call, read token value from cookies
+            else
             {
-                badRequestDetail = "Refresh token is invalid.";
-            }
-            else if (refreshTokenDb.ExpiryDate <= DateTime.Now)
-            {
-                badRequestDetail = "Refresh token is expired.";
+                if (Request.Cookies[BackConstants.REFRESH_TOKEN_COOKIE_NAME] is not null)
+                {
+                    refreshToken = Request.Cookies[BackConstants.REFRESH_TOKEN_COOKIE_NAME];
+                }
             }
 
+            RefreshToken? refreshTokenDb = null;
+
+            // Validate the refresh token
+            if (string.IsNullOrEmpty(refreshToken))
+            {
+                badRequestDetail = "Refresh token is missing.";
+            }
+            else
+            {
+                var refreshTokenEncryptedValue = _encryptionService.Encrypt(refreshToken);
+                refreshTokenDb = await _refreshTokenRepository.GetByTokenValueAsync(refreshTokenEncryptedValue);
+
+                if (refreshTokenDb is null)
+                {
+                    badRequestDetail = "Refresh token invalid or user has no refresh token.";
+                }
+                else
+                {
+                    if (refreshTokenDb.ExpiryDate <= DateTime.Now)
+                    {
+                        badRequestDetail = "Refresh token is expired.";
+                    }
+                }
+            }
+
+            // Send a BadRequest if any validation problem found
             if (!string.IsNullOrEmpty(badRequestDetail))
             {
                 var problemDetails = new ProblemDetails()
@@ -282,14 +307,17 @@ namespace Concert.DataAccess.API.Controllers
                 return BadRequest(problemDetails);
             }
 
-            // Extract claims from access token
+            var identityUser = await _userManager.FindByNameAsync(refreshTokenDb.UserName);
+            var roles = await _userManager.GetRolesAsync(identityUser);
             var claims = new List<Claim>();
-            foreach (var claim in claimsPrincipal.Claims)
+            
+            if (roles is not null)
             {
-                if (claim.Type == ClaimTypes.Email || claim.Type == ClaimTypes.Role)
-                {
-                    claims.Add(claim);
-                }
+                claims = CreateClaimsForTokenGeneration(identityUser.Id, identityUser.Email, (List<string>)roles);
+            }
+            else
+            {
+                claims = CreateClaimsForTokenGeneration(identityUser.Id, identityUser.Email, new List<string>());
             }
 
             var response = await CreateTokens(claims);
@@ -311,11 +339,43 @@ namespace Concert.DataAccess.API.Controllers
             };
 
             LoggerHelper<AuthController>.LogResultEndpoint(_logger, HttpContext, "Ok", responseForLogging);
-            return Ok(response);      
+
+            // Return tokens only for API clients
+            if (!string.IsNullOrEmpty(apiRequest) && apiRequest == "true")
+            {
+                return Ok(response);
+            }
+            // Set secure HTTP-only cookies for frontend
+            else
+            {
+                // Cookie for JWT token
+                Response.Cookies.Append(BackConstants.JWT_TOKEN_COOKIE_NAME,
+                    response.AccessToken.Value, new CookieOptions
+                    {
+                        HttpOnly = true,
+                        Secure = true,
+                        SameSite = SameSiteMode.None, // Required for cross-origin requests
+                        Expires = response.AccessToken.ExpiresAt,
+                        Path = "/"
+                    });
+
+                // Cookie for refresh token
+                Response.Cookies.Append(BackConstants.REFRESH_TOKEN_COOKIE_NAME,
+                    response.RefreshToken.Value, new CookieOptions
+                    {
+                        HttpOnly = true,
+                        Secure = true,
+                        SameSite = SameSiteMode.None,
+                        Expires = response.RefreshToken.ExpiresAt,
+                        Path = "/"
+                    });
+
+                return Ok(new { message = "User tokens were successfully refreshed!" });
+            }  
         }
 
         /// <summary>
-        /// POST: api/auth/Revoke
+        /// POST: api/auth/revoke
         /// Revoke refresh token. User can only revoke his own refresh token,
         /// except Admin user who can revoke any
         /// </summary>
@@ -381,7 +441,7 @@ namespace Concert.DataAccess.API.Controllers
         }
 
         /// <summary>
-        /// GET: api/auth/UserInfo
+        /// GET: api/auth/user-info
         /// Get authenticated user name and roles
         /// </summary>
         /// <returns></returns>
